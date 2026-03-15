@@ -23,9 +23,10 @@ export function AppHeader({ session }: AppHeaderProps) {
     <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
       <SidebarTrigger />
       <div className="flex flex-1" />
-<DropdownMenu>
+      <DropdownMenu>
         <DropdownMenuTrigger
           className="flex items-center gap-2 rounded-md p-1.5 hover:bg-accent"
+          aria-label="User menu"
         >
           <Avatar className="size-8">
             <AvatarFallback>

@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -112,19 +113,20 @@ export function OrderForm({ products, mode, orderId, initialValues }: OrderFormP
 
       const response = await fetch(endpoint, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        setError(result.error ?? "Failed to save order.");
+        const msg = result.error ?? "Failed to save order.";
+        setError(msg);
+        toast.error(msg);
         return;
       }
 
+      toast.success(mode === "create" ? "Order created successfully." : "Order updated successfully.");
       router.push(`/orders/${result.data.id}`);
       router.refresh();
     });
@@ -271,6 +273,7 @@ export function OrderForm({ products, mode, orderId, initialValues }: OrderFormP
                   size="icon"
                   onClick={() => removeItem(index)}
                   disabled={items.length === 1}
+                  aria-label="Remove item"
                 >
                   <Trash2 className="size-4" />
                 </Button>

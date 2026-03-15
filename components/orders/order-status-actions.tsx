@@ -2,12 +2,19 @@
 
 import { useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 interface OrderStatusActionsProps {
   orderId: string;
   status: string;
 }
+
+const statusLabels: Record<string, string> = {
+  confirmed: "confirmed",
+  fulfilled: "fulfilled",
+  cancelled: "cancelled",
+};
 
 export function OrderStatusActions({ orderId, status }: OrderStatusActionsProps) {
   const router = useRouter();
@@ -20,19 +27,20 @@ export function OrderStatusActions({ orderId, status }: OrderStatusActionsProps)
     startTransition(async () => {
       const response = await fetch(`/api/orders/${orderId}/status`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: nextStatus }),
       });
 
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        setError(result.error ?? "Failed to update order status.");
+        const msg = result.error ?? "Failed to update order status.";
+        setError(msg);
+        toast.error(msg);
         return;
       }
 
+      toast.success(`Order marked as ${statusLabels[nextStatus] ?? nextStatus}.`);
       router.refresh();
     });
   };

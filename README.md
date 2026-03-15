@@ -10,6 +10,8 @@ Florist inventory management system built with Next.js, TypeScript, Tailwind, sh
 - **shadcn/ui**
 - **Prisma** + **PostgreSQL**
 - **NextAuth.js** (Auth.js v5)
+- **Recharts** (dashboard charts)
+- **Sonner** (toast notifications)
 
 ## Getting Started
 
@@ -22,8 +24,10 @@ cp .env.example .env
 Edit `.env` with your PostgreSQL connection string and generate an auth secret:
 
 ```bash
-npx auth secret
+openssl rand -base64 32
 ```
+
+Add the generated value as `AUTH_SECRET` in `.env`.
 
 ### 2. Database Setup
 
@@ -49,20 +53,51 @@ Open [http://localhost:3002](http://localhost:3002).
 
 ```
 app/
-├── (dashboard)/          # Protected dashboard routes
-│   ├── dashboard/
-│   ├── products/
-│   ├── suppliers/
-│   ├── shipments/
-│   ├── orders/
-│   └── reports/
+├── (dashboard)/              # Protected dashboard routes
+│   ├── dashboard/            # KPI cards, charts, recent activity
+│   ├── products/             # Product list (placeholder)
+│   ├── suppliers/            # Supplier list (placeholder)
+│   ├── shipments/            # List, create, detail pages
+│   │   ├── page.tsx
+│   │   ├── new/page.tsx
+│   │   └── [id]/page.tsx
+│   ├── orders/               # List, create, detail, edit pages
+│   │   ├── page.tsx
+│   │   ├── new/page.tsx
+│   │   ├── [id]/page.tsx
+│   │   └── [id]/edit/page.tsx
+│   ├── reports/              # Stock, sales, profit reports
+│   ├── loading.tsx           # Shared loading skeleton
+│   ├── error.tsx             # Shared error boundary
+│   └── layout.tsx            # Sidebar + header layout
 ├── login/
-└── api/auth/[...nextauth]/
+├── api/
+│   ├── auth/[...nextauth]/
+│   ├── shipments/
+│   └── orders/
+└── layout.tsx                # Root layout with Toaster
 components/
 ├── app-sidebar.tsx
 ├── app-header.tsx
-└── ui/                   # shadcn components
+├── dashboard/
+│   └── monthly-chart.tsx     # Recharts bar chart
+├── shipments/
+│   └── shipment-form.tsx
+├── orders/
+│   ├── order-form.tsx
+│   └── order-status-actions.tsx
+└── ui/                       # shadcn components
 lib/
+├── actions/
+│   ├── dashboard.ts          # Dashboard queries
+│   ├── reports.ts            # Reports queries
+│   ├── shipments.ts          # Shipment CRUD + stock logic
+│   └── orders.ts             # Order CRUD + fulfillment logic
+├── validations/
+│   ├── shipment.ts           # Zod schemas
+│   └── order.ts
+├── format.ts                 # Currency, date, number formatters
+├── order-number.ts           # Order number generation
 ├── prisma.ts
 └── utils.ts
 prisma/
@@ -74,7 +109,7 @@ prisma/
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start dev server |
+| `npm run dev` | Start dev server (port 3002) |
 | `npm run build` | Production build |
 | `npm run db:generate` | Generate Prisma client |
 | `npm run db:push` | Push schema (no migrations) |
@@ -85,3 +120,7 @@ prisma/
 ## Seed Plan
 
 See [docs/SEED_PLAN.md](docs/SEED_PLAN.md) for florist inventory sample data details.
+
+## Project Notes
+
+See [docs/PROJECT_NOTES.md](docs/PROJECT_NOTES.md) for MVP status, known limitations, and architecture decisions.

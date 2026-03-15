@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -69,24 +70,20 @@ export function ShipmentForm({ suppliers, products }: ShipmentFormProps) {
     startTransition(async () => {
       const response = await fetch("/api/shipments", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          supplierId,
-          expectedAt,
-          notes,
-          items,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ supplierId, expectedAt, notes, items }),
       });
 
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        setError(result.error ?? "Failed to create shipment.");
+        const msg = result.error ?? "Failed to create shipment.";
+        setError(msg);
+        toast.error(msg);
         return;
       }
 
+      toast.success("Shipment created successfully.");
       router.push(`/shipments/${result.data.id}`);
       router.refresh();
     });
@@ -204,6 +201,7 @@ export function ShipmentForm({ suppliers, products }: ShipmentFormProps) {
                   size="icon"
                   onClick={() => removeItem(index)}
                   disabled={items.length === 1}
+                  aria-label="Remove item"
                 >
                   <Trash2 className="size-4" />
                 </Button>

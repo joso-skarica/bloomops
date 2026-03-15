@@ -93,6 +93,7 @@ model Product {
   supplier        Supplier?       @relation(fields: [supplierId], references: [id], onDelete: SetNull)
   orderItems      OrderItem[]
   shipmentItems   ShipmentItem[]
+  stockHistory    StockHistory[]
 
   @@map("products")
 }
@@ -148,7 +149,7 @@ model Order {
   id          String   @id @default(cuid())
   userId      String?  @map("user_id")
   orderNumber String   @unique @map("order_number")
-  status      String   @default("pending") // pending, confirmed, fulfilled, cancelled
+  status      String   @default("draft") // draft, confirmed, fulfilled, cancelled
   customerName  String? @map("customer_name")
   customerEmail String? @map("customer_email")
   customerPhone String? @map("customer_phone")
@@ -165,15 +166,30 @@ model Order {
 }
 
 model OrderItem {
-  id        String  @id @default(cuid())
-  orderId   String  @map("order_id")
-  productId String  @map("product_id")
-  quantity  Int
-  unitPrice Decimal @map("unit_price") @db.Decimal(10, 2)
+  id               String   @id @default(cuid())
+  orderId          String   @map("order_id")
+  productId        String   @map("product_id")
+  quantity         Int
+  unitPrice        Decimal  @map("unit_price") @db.Decimal(10, 2)
+  unitCostSnapshot Decimal? @map("unit_cost_snapshot") @db.Decimal(10, 2)
 
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([orderId, productId])
   @@map("order_items")
+}
+
+model StockHistory {
+  id          String   @id @default(cuid())
+  productId   String   @map("product_id")
+  quantity    Int // positive = increase, negative = decrease
+  type        String // "shipment_in" | "order_out"
+  referenceId String?  @map("reference_id") // shipmentId or orderId
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("stock_history")
 }

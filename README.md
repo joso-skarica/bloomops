@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BloomOps
+
+Florist inventory management system built with Next.js, TypeScript, Tailwind, shadcn/ui, Prisma, and PostgreSQL.
+
+## Tech Stack
+
+- **Next.js 16** (App Router)
+- **TypeScript**
+- **Tailwind CSS**
+- **shadcn/ui**
+- **Prisma** + **PostgreSQL**
+- **NextAuth.js** (Auth.js v5)
 
 ## Getting Started
 
-First, run the development server:
+### 1. Environment Setup
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your PostgreSQL connection string and generate an auth secret:
+
+```bash
+npx auth secret
+```
+
+### 2. Database Setup
+
+```bash
+npm run db:push    # Push schema to database
+npm run db:seed    # Seed sample florist data (optional)
+```
+
+### 3. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3002](http://localhost:3002).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Demo Login
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Email:** admin@bloomops.com
+- **Password:** admin123
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+app/
+├── (dashboard)/          # Protected dashboard routes
+│   ├── dashboard/
+│   ├── products/
+│   ├── suppliers/
+│   ├── shipments/
+│   ├── orders/
+│   └── reports/
+├── login/
+└── api/auth/[...nextauth]/
+components/
+├── app-sidebar.tsx
+├── app-header.tsx
+└── ui/                   # shadcn components
+lib/
+├── prisma.ts
+└── utils.ts
+prisma/
+├── schema.prisma
+└── seed.ts
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server |
+| `npm run build` | Production build |
+| `npm run db:generate` | Generate Prisma client |
+| `npm run db:push` | Push schema (no migrations) |
+| `npm run db:migrate` | Run migrations |
+| `npm run db:seed` | Seed sample data |
+| `npm run db:studio` | Open Prisma Studio |
 
-## Deploy on Vercel
+## Seed Plan
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See [docs/SEED_PLAN.md](docs/SEED_PLAN.md) for florist inventory sample data details.

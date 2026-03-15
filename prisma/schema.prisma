@@ -1,0 +1,179 @@
+// BloomOps - Florist Inventory Management
+// Prisma schema with NextAuth models + florist domain models
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// NextAuth.js models (for OAuth providers)
+// =============================================================================
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  passwordHash  String?   @map("password_hash") // For credentials auth
+  role          String    @default("user")       // user, admin
+
+  accounts  Account[]
+  sessions  Session[]
+  orders    Order[]
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// =============================================================================
+// Florist domain models
+// =============================================================================
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  sku         String?  @unique
+  category    String   // flowers, plants, supplies, etc.
+  unit        String   @default("each") // each, bunch, box, stem
+  costPrice   Decimal  @map("cost_price") @db.Decimal(10, 2)
+  sellPrice   Decimal  @map("sell_price") @db.Decimal(10, 2)
+  stockQty    Int      @map("stock_qty") @default(0)
+  minStock    Int      @map("min_stock") @default(0)
+  supplierId  String?  @map("supplier_id")
+  description String?  @db.Text
+  isActive    Boolean  @map("is_active") @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  supplier        Supplier?       @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  orderItems      OrderItem[]
+  shipmentItems   ShipmentItem[]
+
+  @@map("products")
+}
+
+model Supplier {
+  id        String   @id @default(cuid())
+  name      String
+  contact   String?
+  email     String?
+  phone     String?
+  address   String?  @db.Text
+  notes     String?  @db.Text
+  isActive  Boolean  @map("is_active") @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  products   Product[]
+  shipments  Shipment[]
+
+  @@map("suppliers")
+}
+
+model Shipment {
+  id          String    @id @default(cuid())
+  supplierId  String    @map("supplier_id")
+  status      String    @default("pending") // pending, received, partial, cancelled
+  expectedAt  DateTime? @map("expected_at")
+  receivedAt DateTime?  @map("received_at")
+  notes       String?   @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  supplier       Supplier        @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  shipmentItems  ShipmentItem[]
+
+  @@map("shipments")
+}
+
+model ShipmentItem {
+  id         String  @id @default(cuid())
+  shipmentId String  @map("shipment_id")
+  productId  String  @map("product_id")
+  quantity   Int
+  unitCost   Decimal @map("unit_cost") @db.Decimal(10, 2)
+
+  shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("shipment_items")
+}
+
+model Order {
+  id          String   @id @default(cuid())
+  userId      String?  @map("user_id")
+  orderNumber String   @unique @map("order_number")
+  status      String   @default("pending") // pending, confirmed, fulfilled, cancelled
+  customerName  String? @map("customer_name")
+  customerEmail String? @map("customer_email")
+  customerPhone String? @map("customer_phone")
+  deliveryDate  DateTime? @map("delivery_date")
+  notes       String?  @db.Text
+  totalAmount Decimal  @map("total_amount") @db.Decimal(10, 2) @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  orderItems OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String  @map("order_id")
+  productId String  @map("product_id")
+  quantity  Int
+  unitPrice Decimal @map("unit_price") @db.Decimal(10, 2)
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([orderId, productId])
+  @@map("order_items")
+}

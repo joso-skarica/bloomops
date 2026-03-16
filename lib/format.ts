@@ -1,37 +1,26 @@
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-});
+import { Decimal } from "@prisma/client/runtime/library";
 
-const numberFormatter = new Intl.NumberFormat("en-US");
-
-const monthNames = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-] as const;
-
-export function formatCurrency(value: number): string {
-  return currencyFormatter.format(value);
-}
-
-export function formatNumber(value: number): string {
-  return numberFormatter.format(value);
+export function formatCurrency(value: number | Decimal | string): string {
+  const num = typeof value === "string" ? parseFloat(value) : Number(value);
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(num);
 }
 
 export function formatDate(date: Date | string): string {
-  const d = typeof date === "string" ? new Date(date) : date;
-  return d.toLocaleDateString("en-US", {
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
     month: "short",
     day: "numeric",
-    year: "numeric",
-  });
+  }).format(new Date(date));
 }
 
-export function formatMonth(date: Date): string {
-  return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+export function formatNumber(value: number): string {
+  return new Intl.NumberFormat("en-US").format(value);
 }
 
-export function startOfMonth(date: Date = new Date()): Date {
+export function startOfMonth(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), 1);
 }
 

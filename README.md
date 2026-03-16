@@ -1,42 +1,86 @@
 # BloomOps
 
-Florist inventory management system built with Next.js, TypeScript, Tailwind, shadcn/ui, Prisma, and PostgreSQL.
+Florist inventory management system — manage products, suppliers, shipments, orders, and reports from a single dashboard.
+
+Built with Next.js 16 App Router, TypeScript, Tailwind CSS, shadcn/ui, Prisma, and PostgreSQL.
+
+---
 
 ## Tech Stack
 
-- **Next.js 16** (App Router)
-- **TypeScript**
-- **Tailwind CSS**
-- **shadcn/ui**
-- **Prisma** + **PostgreSQL**
-- **NextAuth.js** (Auth.js v5)
-- **Recharts** (dashboard charts)
-- **Sonner** (toast notifications)
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS + shadcn/ui |
+| ORM | Prisma 5 |
+| Database | PostgreSQL |
+| Auth | Auth.js v5 (NextAuth) |
+| Charts | Recharts |
+| Notifications | Sonner |
+| Validation | Zod |
 
-## Getting Started
+---
 
-### 1. Environment Setup
+## Local Setup
+
+### Prerequisites
+
+- Node.js 18+
+- PostgreSQL running locally
+
+### 1. Clone and install
+
+```bash
+git clone <repo-url>
+cd bloomops
+npm install
+```
+
+### 2. Configure environment
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` with your PostgreSQL connection string and generate an auth secret:
+Edit `.env` and set:
 
-```bash
-openssl rand -base64 32
+```env
+DATABASE_URL="postgresql://<user>@localhost:5432/bloomops?schema=public"
+DIRECT_URL="postgresql://<user>@localhost:5432/bloomops?schema=public"
+AUTH_SECRET="any-random-string-for-local-dev"
 ```
 
-Add the generated value as `AUTH_SECRET` in `.env`.
+> `AUTH_URL` is not required locally — Auth.js auto-detects it.
 
-### 2. Database Setup
-
+To generate a proper `AUTH_SECRET`:
 ```bash
-npm run db:push    # Push schema to database
-npm run db:seed    # Seed sample florist data (optional)
+npx auth secret
 ```
 
-### 3. Run Development Server
+### 3. Create the database
+
+```bash
+createdb bloomops
+```
+
+### 4. Push schema and generate Prisma client
+
+```bash
+npm run db:push
+```
+
+> This syncs the schema to your local database without creating migration files. For production, see [DEPLOYMENT.md](DEPLOYMENT.md).
+
+### 5. Seed sample data (optional)
+
+```bash
+npm run db:seed
+```
+
+Inserts sample suppliers, products, shipments, and orders for a florist inventory scenario.
+
+### 6. Start the dev server
 
 ```bash
 npm run dev
@@ -44,83 +88,71 @@ npm run dev
 
 Open [http://localhost:3002](http://localhost:3002).
 
-### Demo Login
+### Demo login
 
-- **Email:** admin@bloomops.com
-- **Password:** admin123
+| Field | Value |
+|-------|-------|
+| Email | `admin@bloomops.com` |
+| Password | `admin123` |
 
-## Project Structure
-
-```
-app/
-├── (dashboard)/              # Protected dashboard routes
-│   ├── dashboard/            # KPI cards, charts, recent activity
-│   ├── products/             # Product list (placeholder)
-│   ├── suppliers/            # Supplier list (placeholder)
-│   ├── shipments/            # List, create, detail pages
-│   │   ├── page.tsx
-│   │   ├── new/page.tsx
-│   │   └── [id]/page.tsx
-│   ├── orders/               # List, create, detail, edit pages
-│   │   ├── page.tsx
-│   │   ├── new/page.tsx
-│   │   ├── [id]/page.tsx
-│   │   └── [id]/edit/page.tsx
-│   ├── reports/              # Stock, sales, profit reports
-│   ├── loading.tsx           # Shared loading skeleton
-│   ├── error.tsx             # Shared error boundary
-│   └── layout.tsx            # Sidebar + header layout
-├── login/
-├── api/
-│   ├── auth/[...nextauth]/
-│   ├── shipments/
-│   └── orders/
-└── layout.tsx                # Root layout with Toaster
-components/
-├── app-sidebar.tsx
-├── app-header.tsx
-├── dashboard/
-│   └── monthly-chart.tsx     # Recharts bar chart
-├── shipments/
-│   └── shipment-form.tsx
-├── orders/
-│   ├── order-form.tsx
-│   └── order-status-actions.tsx
-└── ui/                       # shadcn components
-lib/
-├── actions/
-│   ├── dashboard.ts          # Dashboard queries
-│   ├── reports.ts            # Reports queries
-│   ├── shipments.ts          # Shipment CRUD + stock logic
-│   └── orders.ts             # Order CRUD + fulfillment logic
-├── validations/
-│   ├── shipment.ts           # Zod schemas
-│   └── order.ts
-├── format.ts                 # Currency, date, number formatters
-├── order-number.ts           # Order number generation
-├── prisma.ts
-└── utils.ts
-prisma/
-├── schema.prisma
-└── seed.ts
-```
+---
 
 ## Scripts
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start dev server (port 3002) |
+| `npm run dev` | Start dev server on port 3002 |
 | `npm run build` | Production build |
-| `npm run db:generate` | Generate Prisma client |
-| `npm run db:push` | Push schema (no migrations) |
-| `npm run db:migrate` | Run migrations |
-| `npm run db:seed` | Seed sample data |
+| `npm run start` | Start production server |
+| `npm run db:push` | Sync schema to local DB (no migration files) |
+| `npm run db:migrate` | Create a new migration (dev only) |
+| `npm run db:migrate:deploy` | Apply pending migrations (production) |
+| `npm run db:seed` | Seed sample florist data |
 | `npm run db:studio` | Open Prisma Studio |
 
-## Seed Plan
+---
 
-See [docs/SEED_PLAN.md](docs/SEED_PLAN.md) for florist inventory sample data details.
+## Project Structure
 
-## Project Notes
+```
+app/
+├── (dashboard)/          # Protected routes (require login)
+│   ├── dashboard/        # KPI cards and charts
+│   ├── products/         # Product list, create, edit, detail
+│   ├── suppliers/        # Supplier list, create, edit, detail
+│   ├── shipments/        # Shipment tracking
+│   ├── orders/           # Order management
+│   ├── reports/          # Stock, sales, and profit reports
+│   └── layout.tsx        # Sidebar + header layout
+├── login/                # Public login page
+├── api/auth/             # Auth.js route handlers
+└── layout.tsx            # Root layout
+components/
+├── products/             # Product-specific components
+├── suppliers/            # Supplier-specific components
+├── ui/                   # shadcn/ui primitives
+├── app-sidebar.tsx       # Main navigation sidebar
+└── app-header.tsx        # Top navigation bar
+lib/
+├── actions/              # Server actions (CRUD, search)
+├── validations/          # Zod schemas
+├── format.ts             # Currency, date, number formatters
+└── prisma.ts             # Prisma client singleton
+prisma/
+├── schema.prisma         # Database schema
+├── migrations/           # Migration history (created before first deploy)
+└── seed.ts               # Sample data seed script
+```
 
-See [docs/PROJECT_NOTES.md](docs/PROJECT_NOTES.md) for MVP status, known limitations, and architecture decisions.
+---
+
+## Deploying to Production
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for a complete guide covering:
+
+- Provisioning a hosted PostgreSQL database (Neon, Supabase, Railway, Render)
+- Creating migration files before the first deploy
+- Vercel project setup and required environment variables
+- Running `prisma migrate deploy` against the production database
+- Ongoing schema change workflow
+- Known deployment risks (demo credentials, no rate limiting, etc.)

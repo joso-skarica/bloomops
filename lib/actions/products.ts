@@ -146,3 +146,11 @@ export async function restoreProduct(id: string): Promise<ActionResult> {
   revalidatePath("/products");
   return { success: true, message: "Product restored" };
 }
+
+export async function getStockHistory(productId: string) {
+  return prisma.stockHistory.findMany({
+    where: { productId },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+  });
+}

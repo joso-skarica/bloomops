@@ -27,3 +27,21 @@ export function startOfMonth(date: Date): Date {
 export function monthsAgo(n: number, from: Date = new Date()): Date {
   return new Date(from.getFullYear(), from.getMonth() - n, 1);
 }
+
+type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
+
+export function getOrderStatusVariant(status: string): BadgeVariant {
+  switch (status) {
+    case "fulfilled":  return "default";
+    case "confirmed":  return "secondary";
+    case "cancelled":  return "destructive";
+    default:           return "outline"; // draft
+  }
+}
+
+export function getShipmentStatusVariant(status: string): BadgeVariant {
+  switch (status) {
+    case "received":  return "default";
+    default:          return "outline"; // pending
+  }
+}

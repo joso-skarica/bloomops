@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
+import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,16 +14,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getOrders } from "@/lib/actions/orders";
+import { formatCurrency, getOrderStatusVariant } from "@/lib/format";
+import { OrderSearch } from "@/components/orders/order-search";
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(value);
-}
-
-export default async function OrdersPage() {
-  const orders = await getOrders();
+export default async function OrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ search?: string; status?: string }>;
+}) {
+  const sp = await searchParams;
+  const orders = await getOrders({ search: sp.search, status: sp.status });
 
   return (
     <div className="space-y-6">
@@ -36,9 +37,17 @@ export default async function OrdersPage() {
         </Link>
       </div>
 
+      <Suspense>
+        <OrderSearch />
+      </Suspense>
+
       <Card>
         <CardHeader>
-          <CardTitle>All Orders</CardTitle>
+          <CardTitle>
+            {orders.length === 0 && (sp.search || sp.status)
+              ? "No orders match your filters"
+              : `All Orders`}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -55,7 +64,9 @@ export default async function OrdersPage() {
               {orders.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center text-muted-foreground">
-                    No orders yet.
+                    {sp.search || sp.status
+                      ? "No orders match your filters."
+                      : "No orders yet."}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -68,7 +79,7 @@ export default async function OrdersPage() {
                     </TableCell>
                     <TableCell>{order.customerName || "-"}</TableCell>
                     <TableCell>
-                      <Badge variant="outline">{order.status}</Badge>
+                      <Badge variant={getOrderStatusVariant(order.status)}>{order.status}</Badge>
                     </TableCell>
                     <TableCell>
                       {order.deliveryDate

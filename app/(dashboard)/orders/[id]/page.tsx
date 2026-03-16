@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
+import { formatCurrency, getOrderStatusVariant } from "@/lib/format";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,13 +16,6 @@ import {
 } from "@/components/ui/table";
 import { getOrderById } from "@/lib/actions/orders";
 import { OrderStatusActions } from "@/components/orders/order-status-actions";
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(value);
-}
 
 export default async function OrderDetailPage({
   params,
@@ -55,7 +49,7 @@ export default async function OrderDetailPage({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             Order Info
-            <Badge variant="outline">{order.status}</Badge>
+            <Badge variant={getOrderStatusVariant(order.status)}>{order.status}</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-2 text-sm md:grid-cols-2">

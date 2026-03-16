@@ -21,7 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getDashboardData } from "@/lib/actions/dashboard";
-import { formatCurrency, formatDate, formatNumber } from "@/lib/format";
+import { formatCurrency, formatDate, formatNumber, getOrderStatusVariant, getShipmentStatusVariant } from "@/lib/format";
 import { MonthlyChart } from "@/components/dashboard/monthly-chart";
 
 const kpiIcons = {
@@ -153,7 +153,7 @@ export default async function DashboardPage() {
                         </Link>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">{s.status}</Badge>
+                        <Badge variant={getShipmentStatusVariant(s.status)}>{s.status}</Badge>
                       </TableCell>
                       <TableCell>{formatDate(s.createdAt)}</TableCell>
                       <TableCell className="text-right">{formatCurrency(s.total)}</TableCell>
@@ -200,7 +200,7 @@ export default async function DashboardPage() {
                       </TableCell>
                       <TableCell>{o.customerName || "-"}</TableCell>
                       <TableCell>
-                        <Badge variant="outline">{o.status}</Badge>
+                        <Badge variant={getOrderStatusVariant(o.status)}>{o.status}</Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         {formatCurrency(o.totalAmount)}

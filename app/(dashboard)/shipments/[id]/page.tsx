@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
+import { formatCurrency, getShipmentStatusVariant } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -12,13 +13,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getShipmentById } from "@/lib/actions/shipments";
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(value);
-}
 
 export default async function ShipmentDetailPage({
   params,
@@ -48,7 +42,7 @@ export default async function ShipmentDetailPage({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             Shipment Info
-            <Badge variant="outline">{shipment.status}</Badge>
+            <Badge variant={getShipmentStatusVariant(shipment.status)}>{shipment.status}</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-2 text-sm md:grid-cols-2">

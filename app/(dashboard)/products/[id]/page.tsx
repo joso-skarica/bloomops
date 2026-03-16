@@ -1,10 +1,18 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getProduct } from "@/lib/actions/products";
+import { getProduct, getStockHistory } from "@/lib/actions/products";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency } from "@/lib/format";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { formatCurrency, formatDate } from "@/lib/format";
 import { ArchiveProductButton } from "@/components/products/archive-product-button";
 import {
   ChevronLeft,
@@ -15,13 +23,21 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
+const stockHistoryLabels: Record<string, string> = {
+  shipment_in: "Shipment received",
+  order_out: "Order fulfilled",
+};
+
 export default async function ProductDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const product = await getProduct(id);
+  const [product, history] = await Promise.all([
+    getProduct(id),
+    getStockHistory(id),
+  ]);
 
   if (!product) notFound();
 
@@ -157,6 +173,50 @@ export default async function ProductDetailPage({
           </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Stock History</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {history.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No stock movements recorded yet.
+            </p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead className="text-right">Qty Change</TableHead>
+                  <TableHead>Notes</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {history.map((entry) => (
+                  <TableRow key={entry.id}>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {formatDate(entry.createdAt)}
+                    </TableCell>
+                    <TableCell>
+                      {stockHistoryLabels[entry.type] ?? entry.type}
+                    </TableCell>
+                    <TableCell className="text-right font-mono">
+                      <span className={entry.quantity > 0 ? "text-green-600" : "text-destructive"}>
+                        {entry.quantity > 0 ? `+${entry.quantity}` : entry.quantity}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {entry.notes ?? "—"}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

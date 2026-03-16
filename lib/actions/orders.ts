@@ -17,8 +17,22 @@ function calculateOrderTotal(items: Array<{ quantity: number; unitPrice: number 
   return items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
 }
 
-export async function getOrders() {
+export async function getOrders(opts?: { search?: string; status?: string }) {
+  const where: Record<string, unknown> = {};
+
+  if (opts?.status && opts.status !== "all") {
+    where.status = opts.status;
+  }
+
+  if (opts?.search) {
+    where.OR = [
+      { orderNumber: { contains: opts.search, mode: "insensitive" } },
+      { customerName: { contains: opts.search, mode: "insensitive" } },
+    ];
+  }
+
   return prisma.order.findMany({
+    where,
     include: {
       orderItems: {
         include: {

@@ -5,6 +5,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -38,15 +39,17 @@ export function AppHeader({ session }: AppHeaderProps) {
           </span>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel>Account</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onSelect={() => signOut({ callbackUrl: "/" })}
-            className="flex cursor-default items-center gap-2"
-          >
-            <LogOut className="size-4" />
-            Sign out
-          </DropdownMenuItem>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onSelect={() => signOut({ callbackUrl: "/" })}
+              className="flex cursor-default items-center gap-2"
+            >
+              <LogOut className="size-4" />
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
     </header>

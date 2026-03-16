@@ -29,7 +29,22 @@ export default async function EditProductPage({
           Back to {product.name}
         </Link>
       </div>
-      <ProductForm product={product} suppliers={suppliers} />
+      <ProductForm
+        product={{
+          id: product.id,
+          name: product.name,
+          sku: product.sku,
+          category: product.category,
+          unit: product.unit,
+          costPrice: Number(product.costPrice),
+          sellPrice: Number(product.sellPrice),
+          stockQty: product.stockQty,
+          minStock: product.minStock,
+          supplierId: product.supplierId,
+          description: product.description,
+        }}
+        suppliers={suppliers}
+      />
     </div>
   );
 }

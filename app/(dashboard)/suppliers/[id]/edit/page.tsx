@@ -25,7 +25,17 @@ export default async function EditSupplierPage({
           Back to {supplier.name}
         </Link>
       </div>
-      <SupplierForm supplier={supplier} />
+      <SupplierForm
+        supplier={{
+          id: supplier.id,
+          name: supplier.name,
+          contact: supplier.contact,
+          email: supplier.email,
+          phone: supplier.phone,
+          address: supplier.address,
+          notes: supplier.notes,
+        }}
+      />
     </div>
   );
 }

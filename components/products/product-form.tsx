@@ -23,7 +23,6 @@ import {
   PRODUCT_UNITS,
 } from "@/lib/validations/product";
 import Link from "next/link";
-import type { Decimal } from "@prisma/client/runtime/library";
 
 interface ProductFormProps {
   product?: {
@@ -32,8 +31,8 @@ interface ProductFormProps {
     sku: string | null;
     category: string;
     unit: string;
-    costPrice: Decimal;
-    sellPrice: Decimal;
+    costPrice: number;
+    sellPrice: number;
     stockQty: number;
     minStock: number;
     supplierId: string | null;

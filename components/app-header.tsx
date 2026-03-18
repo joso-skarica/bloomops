@@ -43,7 +43,7 @@ export function AppHeader({ session }: AppHeaderProps) {
             <DropdownMenuLabel>Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onSelect={() => signOut({ callbackUrl: "/" })}
+              onClick={() => signOut({ callbackUrl: "/" })}
               className="flex cursor-default items-center gap-2"
             >
               <LogOut className="size-4" />

@@ -1,16 +1,16 @@
 # BloomOps — Deployment Guide
 
-This guide covers deploying BloomOps to [Vercel](https://vercel.com) with a hosted PostgreSQL database. The same principles apply to other Node.js hosting platforms.
+BloomOps is deployed on [Railway](https://railway.app). This guide covers setting up a Railway deployment with a PostgreSQL database, either hosted on Railway itself or on an external provider such as Neon.
 
 ---
 
 ## Table of Contents
 
 1. [Pre-deploy checklist](#1-pre-deploy-checklist)
-2. [Provision a hosted PostgreSQL database](#2-provision-a-hosted-postgresql-database)
+2. [Provision a PostgreSQL database](#2-provision-a-postgresql-database)
 3. [Create migrations locally](#3-create-migrations-locally)
-4. [Deploy to Vercel](#4-deploy-to-vercel)
-5. [Set environment variables on Vercel](#5-set-environment-variables-on-vercel)
+4. [Deploy to Railway](#4-deploy-to-railway)
+5. [Set environment variables](#5-set-environment-variables)
 6. [Run migrations on the production database](#6-run-migrations-on-the-production-database)
 7. [Seed production data (optional)](#7-seed-production-data-optional)
 8. [Ongoing schema change workflow](#8-ongoing-schema-change-workflow)
@@ -20,7 +20,7 @@ This guide covers deploying BloomOps to [Vercel](https://vercel.com) with a host
 
 ## 1. Pre-deploy checklist
 
-- [ ] A hosted PostgreSQL database is provisioned (see step 2)
+- [ ] A PostgreSQL database is provisioned (see step 2)
 - [ ] `AUTH_SECRET` is generated (`npx auth secret`)
 - [ ] Migrations exist in `prisma/migrations/` (see step 3)
 - [ ] `.env` is **not** committed to git (`.gitignore` already excludes `env*`)
@@ -28,57 +28,35 @@ This guide covers deploying BloomOps to [Vercel](https://vercel.com) with a host
 
 ---
 
-## 2. Provision a hosted PostgreSQL database
+## 2. Provision a PostgreSQL database
 
-Choose one of the following providers. All work with Prisma out of the box.
+### Option A — Railway PostgreSQL (recommended, everything on one platform)
 
-### Neon (recommended for Vercel)
+1. In your Railway project, click **New** → **Database** → **PostgreSQL**.
+2. Once provisioned, open the PostgreSQL service → **Variables** tab.
+3. Copy the `DATABASE_URL`. Use this value for both `DATABASE_URL` and `DIRECT_URL` — Railway does not use a separate pooler.
 
-Neon is serverless PostgreSQL with a generous free tier and native Vercel integration.
+### Option B — Neon (external serverless PostgreSQL)
 
 1. Create a project at [neon.tech](https://neon.tech).
 2. From the **Connection Details** panel, copy two URLs:
    - **Pooled connection** (host ends in `-pooler.neon.tech`) → `DATABASE_URL`
-   - **Direct connection** (host ends in `.neon.tech`, no `-pooler`) → `DIRECT_URL`
-3. Append `?schema=public` to both URLs if not already present.
+   - **Direct connection** (no `-pooler`) → `DIRECT_URL`
+3. Append `?schema=public` if not already present.
 
-> Neon's pooled connection uses PgBouncer in transaction mode. Prisma requires the direct URL for migrations and schema introspection.
-
-### Supabase
-
-1. Create a project at [supabase.com](https://supabase.com).
-2. Go to **Project Settings → Database → Connection string**.
-3. Copy the **URI** (direct, port 5432) → both `DATABASE_URL` and `DIRECT_URL`.
-4. If you want pooling, use the **Session mode** pooler URL (port 6543) for `DATABASE_URL` and keep the direct URL for `DIRECT_URL`.
-
-### Railway
-
-1. Create a PostgreSQL service at [railway.app](https://railway.app).
-2. From the service dashboard, copy the **DATABASE_URL**.
-3. Set both `DATABASE_URL` and `DIRECT_URL` to the same value (Railway does not use a separate pooler URL).
-
-### Render
-
-1. Create a PostgreSQL instance at [render.com](https://render.com).
-2. Copy the **External Database URL**.
-3. Set both `DATABASE_URL` and `DIRECT_URL` to the same value.
+> With Neon, `DATABASE_URL` and `DIRECT_URL` are different. With Railway PostgreSQL, they are the same value.
 
 ---
 
 ## 3. Create migrations locally
 
-The schema was initially set up with `prisma db push`, which does not produce migration files. Before deploying to production you must create an initial migration:
+The schema was initially set up with `prisma db push`, which does not produce migration files. Before deploying to production, create an initial migration:
 
 ```bash
-# In your local bloomops directory
 npx prisma migrate dev --name init
 ```
 
-This will:
-- Create a `prisma/migrations/` folder with the initial SQL migration
-- Apply the migration to your local database
-
-Commit the `prisma/migrations/` folder to git — it must be present in the repo for `prisma migrate deploy` to work in production.
+Commit the generated `prisma/migrations/` folder:
 
 ```bash
 git add prisma/migrations/
@@ -87,87 +65,87 @@ git commit -m "add initial prisma migration"
 
 ---
 
-## 4. Deploy to Vercel
+## 4. Deploy to Railway
 
-### Option A — Vercel dashboard (recommended for first deploy)
+A `railway.json` config file is already included in the repository. Railway will auto-detect Next.js and use it automatically.
 
-1. Push your repository to GitHub / GitLab / Bitbucket.
-2. Go to [vercel.com/new](https://vercel.com/new) and import the repository.
-3. Framework preset: **Next.js** (auto-detected).
-4. Leave the build command as-is (`next build`). The `postinstall` script in `package.json` ensures `prisma generate` runs automatically during `npm install`.
-5. Click **Deploy** — the first deploy will fail because environment variables are not set yet. Continue to step 5.
+### Option A — Railway dashboard
 
-### Option B — Vercel CLI
+1. Go to [railway.app](https://railway.app) and create a new project.
+2. Click **Deploy from GitHub repo** and select the BloomOps repository.
+3. Railway detects Next.js and sets the build command to `npm run build` and start command to `npm start`.
+4. The `postinstall` script in `package.json` runs `prisma generate` automatically during `npm install`.
+
+### Option B — Railway CLI
 
 ```bash
-npm i -g vercel
-vercel --prod
+npm install -g @railway/cli
+railway login
+railway link        # link to your Railway project
+railway up          # deploy
 ```
 
 ---
 
-## 5. Set environment variables on Vercel
+## 5. Set environment variables
 
-In the Vercel dashboard go to **Project → Settings → Environment Variables** and add the following:
+In the Railway dashboard, open your Next.js service → **Variables** tab and add:
 
-| Variable | Value | Environments |
-|----------|-------|--------------|
-| `DATABASE_URL` | Pooled connection string from your provider | Production, Preview |
-| `DIRECT_URL` | Direct connection string from your provider | Production, Preview |
-| `AUTH_SECRET` | Output of `npx auth secret` | Production, Preview |
-| `AUTH_URL` | `https://your-app.vercel.app` | Production |
+| Variable | Value | Notes |
+|----------|-------|-------|
+| `DATABASE_URL` | PostgreSQL connection string | Pooled URL for Neon; standard URL for Railway PostgreSQL |
+| `DIRECT_URL` | Direct connection string | Same as `DATABASE_URL` for Railway PostgreSQL |
+| `AUTH_SECRET` | Output of `npx auth secret` | Required in production |
+| `AUTH_URL` | `https://bloomops-production.up.railway.app` | Your Railway app URL, no trailing slash |
 
-> For Preview deployments, set `AUTH_URL` to the Vercel preview URL pattern, or leave it unset and rely on auto-detection (less reliable).
-
-After adding all variables, trigger a new deployment from the Vercel dashboard (**Deployments → Redeploy**).
+After saving variables, Railway will trigger a new deployment automatically.
 
 ---
 
 ## 6. Run migrations on the production database
 
-After the first successful deploy, apply the migrations to the production database.
+Use the **direct** (non-pooled) connection URL when running migrations.
 
-### Option A — Vercel CLI (one-off command)
+### Option A — Run locally pointing at production database
 
 ```bash
-# From your local machine, targeting production env vars
-vercel env pull .env.production.local
-DATABASE_URL=$(grep DATABASE_URL .env.production.local | cut -d= -f2-) \
-DIRECT_URL=$(grep DIRECT_URL .env.production.local | cut -d= -f2-) \
+DIRECT_URL="<production-direct-url>" DATABASE_URL="<production-direct-url>" \
 npx prisma migrate deploy
 ```
 
-### Option B — Run locally with production DATABASE_URL
+### Option B — Railway CLI one-off command
 
 ```bash
-# Temporarily set your production URLs in a separate env file
-DATABASE_URL="<production-direct-url>" DIRECT_URL="<production-direct-url>" \
-npx prisma migrate deploy
+railway run npx prisma migrate deploy
 ```
 
-> Always use the **direct** (non-pooled) URL when running `prisma migrate deploy` — migrations cannot run over PgBouncer.
+This uses the environment variables already set in Railway.
 
-### Option C — Vercel build command
+### Option C — Add to the Railway build command
 
-You can change the Vercel build command to run migrations automatically before each deploy:
+In **Settings → Build Command**, replace the default with:
 
 ```
-prisma migrate deploy && next build
+npx prisma migrate deploy && npm run build
 ```
 
-Set this in **Project → Settings → General → Build Command**. Ensure `DIRECT_URL` is set to the direct connection string so migrations bypass the pooler.
+This applies migrations automatically on every deploy.
 
 ---
 
 ## 7. Seed production data (optional)
 
-If you want sample data in production, run the seed script with the production `DATABASE_URL`:
+```bash
+railway run npx tsx prisma/seed.ts
+```
+
+Or locally with the production URL:
 
 ```bash
 DATABASE_URL="<production-direct-url>" npx tsx prisma/seed.ts
 ```
 
-This is safe to run once on an empty database. Do not run it repeatedly — the seed script does not check for existing data.
+Run once on an empty database only.
 
 ---
 
@@ -176,11 +154,11 @@ This is safe to run once on an empty database. Do not run it repeatedly — the 
 | Step | Command | Where |
 |------|---------|-------|
 | Edit `prisma/schema.prisma` | — | Local |
-| Create a new migration | `npx prisma migrate dev --name <description>` | Local |
-| Commit the migration file | `git add prisma/migrations/ && git commit` | Local |
-| Push to main / open PR | `git push` | Local |
-| Vercel redeploys automatically | — | Vercel |
-| Apply migration to production DB | `npx prisma migrate deploy` (see step 6) | Local or CI |
+| Create a migration | `npx prisma migrate dev --name <description>` | Local |
+| Commit the migration | `git add prisma/migrations/ && git commit` | Local |
+| Push to main | `git push` | Local |
+| Railway redeploys automatically | — | Railway |
+| Apply migration to production DB | `railway run npx prisma migrate deploy` | Local or Railway CLI |
 
 ---
 
@@ -195,25 +173,19 @@ Email:    admin@bloomops.com
 Password: admin123
 ```
 
-Anyone who can reach the deployed URL can log in. For a production system used by real users, replace this with proper password hashing (bcrypt + database lookup) before making the URL public.
+Anyone who can reach the deployed URL can log in. Replace with proper password hashing (bcrypt + database lookup) before making the URL public to untrusted users.
 
 ### No rate limiting on the login endpoint
 
-There is no brute-force protection on `/api/auth/callback/credentials`. For a public deployment, add rate limiting via Vercel Edge Middleware or an upstream WAF.
-
-### Serverless cold starts with Prisma
-
-Vercel runs each serverless function in an isolated environment. Prisma's `PrismaClient` is instantiated on every cold start. For high-traffic applications consider:
-- [Prisma Accelerate](https://www.prisma.io/accelerate) (connection pooling + query caching)
-- Neon's built-in connection pooler (already handled by `DATABASE_URL` vs `DIRECT_URL` setup)
+There is no brute-force protection on `/api/auth/callback/credentials`. For a public deployment, add rate limiting via Railway's upstream proxy or a middleware layer.
 
 ### `prisma db push` is not safe for production
 
-`db push` was used to set up the local database. It drops and recreates constraints without a migration history, making it dangerous to run against a database with real data. Always use `prisma migrate deploy` for production.
+`db push` was used to set up the local database. It can drop and recreate constraints without a migration history. Always use `prisma migrate deploy` for production schema changes.
 
 ### Auth.js v5 is still in beta
 
-`next-auth@^5.0.0-beta.30` is a pre-release package. APIs may change before the stable release. Check the [Auth.js changelog](https://authjs.dev/getting-started/migrating-to-v5) before upgrading.
+`next-auth@^5.0.0-beta.30` is a pre-release package. Check the [Auth.js changelog](https://authjs.dev/getting-started/migrating-to-v5) before upgrading.
 
 ---
 
@@ -221,7 +193,7 @@ Vercel runs each serverless function in an isolated environment. Prisma's `Prism
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `DATABASE_URL` | Yes | PostgreSQL connection string (pooled for Neon/Supabase) |
-| `DIRECT_URL` | Yes | Direct PostgreSQL connection string (for migrations) |
-| `AUTH_SECRET` | Yes | Random secret for JWT signing and encryption |
-| `AUTH_URL` | Production only | Full deployment URL, e.g. `https://your-app.vercel.app` |
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `DIRECT_URL` | Yes | Direct connection string (for migrations; same as `DATABASE_URL` on Railway) |
+| `AUTH_SECRET` | Yes | Random secret for JWT signing |
+| `AUTH_URL` | Yes | Full deployment URL, e.g. `https://bloomops-production.up.railway.app` |

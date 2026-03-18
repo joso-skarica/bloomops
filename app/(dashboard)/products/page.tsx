@@ -14,7 +14,7 @@ import {
 import { formatCurrency } from "@/lib/format";
 import { ProductSearch } from "@/components/products/product-search";
 import { ArchiveProductButton } from "@/components/products/archive-product-button";
-import { Plus, AlertTriangle } from "lucide-react";
+import { Plus, AlertTriangle, Package } from "lucide-react";
 
 export default async function ProductsPage({
   searchParams,
@@ -54,13 +54,21 @@ export default async function ProductsPage({
       </Suspense>
 
       {products.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-          {sp.search || sp.category
-            ? "No products match your filters."
-            : "No products yet. Add your first product to get started."}
+        <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed p-12 text-center">
+          <Package className="size-10 text-muted-foreground/40" />
+          <div>
+            <p className="font-medium text-foreground">
+              {sp.search || sp.category ? "No products match your filters" : "No products yet"}
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {sp.search || sp.category
+                ? "Try adjusting your search or filters."
+                : "Add your first product to get started."}
+            </p>
+          </div>
         </div>
       ) : (
-        <div className="rounded-lg border">
+        <div className="rounded-xl border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -89,7 +97,7 @@ export default async function ProductsPage({
                     <TableCell>
                       <Link
                         href={`/products/${product.id}`}
-                        className="font-medium hover:underline"
+                        className="font-medium hover:underline underline-offset-4"
                       >
                         {product.name}
                       </Link>

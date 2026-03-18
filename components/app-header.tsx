@@ -21,17 +21,17 @@ interface AppHeaderProps {
 
 export function AppHeader({ session }: AppHeaderProps) {
   return (
-    <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+    <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4 shadow-sm">
       <SidebarTrigger />
       <div className="flex flex-1" />
       <DropdownMenu>
         <DropdownMenuTrigger
-          className="flex items-center gap-2 rounded-md p-1.5 hover:bg-accent"
+          className="flex items-center gap-2 rounded-lg p-1.5 transition-colors hover:bg-accent"
           aria-label="User menu"
         >
           <Avatar className="size-8">
-            <AvatarFallback>
-              {session?.user?.name?.[0] ?? session?.user?.email?.[0] ?? "?"}
+            <AvatarFallback className="bg-primary/15 text-primary text-xs font-semibold">
+              {session?.user?.name?.[0]?.toUpperCase() ?? session?.user?.email?.[0]?.toUpperCase() ?? "?"}
             </AvatarFallback>
           </Avatar>
           <span className="text-sm font-medium max-md:sr-only">

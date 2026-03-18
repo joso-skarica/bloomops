@@ -10,6 +10,7 @@ import {
   ShoppingCart,
   TrendingUp,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -88,16 +89,42 @@ export default async function DashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {kpis.map((kpi) => {
           const Icon = kpi.icon;
+          const isLowStock = kpi.label === "Low Stock Items";
+          const hasLowStock = isLowStock && data.lowStockCount > 0;
+
           return (
             <Card key={kpi.label}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   {kpi.label}
                 </CardTitle>
-                <Icon className="size-4 text-muted-foreground" />
+                <div
+                  className={cn(
+                    "flex size-9 items-center justify-center rounded-lg",
+                    hasLowStock
+                      ? "bg-amber-100 dark:bg-amber-950/30"
+                      : "bg-primary/10"
+                  )}
+                >
+                  <Icon
+                    className={cn(
+                      "size-4",
+                      hasLowStock
+                        ? "text-amber-600 dark:text-amber-500"
+                        : "text-primary"
+                    )}
+                  />
+                </div>
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold">{kpi.value}</p>
+                <p
+                  className={cn(
+                    "text-2xl font-bold",
+                    hasLowStock && "text-amber-600 dark:text-amber-500"
+                  )}
+                >
+                  {kpi.value}
+                </p>
               </CardContent>
             </Card>
           );
@@ -113,7 +140,7 @@ export default async function DashboardPage() {
         <MonthlyChart
           title="Monthly Gross Profit"
           data={data.monthlyData.map((d) => ({ month: d.month, value: d.profit }))}
-          color="hsl(142 71% 45%)"
+          color="oklch(0.68 0.15 52)"
         />
       </div>
 
@@ -123,7 +150,7 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">Recent Shipments</CardTitle>
-            <Link href="/shipments" className="text-sm text-muted-foreground underline">
+            <Link href="/shipments" className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors">
               View all
             </Link>
           </CardHeader>
@@ -140,7 +167,7 @@ export default async function DashboardPage() {
               <TableBody>
                 {data.recentShipments.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground">
+                    <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
                       No shipments yet.
                     </TableCell>
                   </TableRow>
@@ -148,7 +175,7 @@ export default async function DashboardPage() {
                   data.recentShipments.map((s) => (
                     <TableRow key={s.id}>
                       <TableCell>
-                        <Link href={`/shipments/${s.id}`} className="underline">
+                        <Link href={`/shipments/${s.id}`} className="font-medium hover:underline underline-offset-4">
                           {s.supplierName}
                         </Link>
                       </TableCell>
@@ -169,7 +196,7 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">Recent Orders</CardTitle>
-            <Link href="/orders" className="text-sm text-muted-foreground underline">
+            <Link href="/orders" className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors">
               View all
             </Link>
           </CardHeader>
@@ -186,7 +213,7 @@ export default async function DashboardPage() {
               <TableBody>
                 {data.recentOrders.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground">
+                    <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
                       No orders yet.
                     </TableCell>
                   </TableRow>
@@ -194,7 +221,7 @@ export default async function DashboardPage() {
                   data.recentOrders.map((o) => (
                     <TableRow key={o.id}>
                       <TableCell>
-                        <Link href={`/orders/${o.id}`} className="underline">
+                        <Link href={`/orders/${o.id}`} className="font-medium hover:underline underline-offset-4">
                           {o.orderNumber}
                         </Link>
                       </TableCell>

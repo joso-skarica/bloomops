@@ -4,7 +4,7 @@ Inventory and operations management for small florist businesses.
 
 BloomOps lets you track products and stock levels, manage suppliers and incoming shipments, create and fulfil customer orders, and monitor sales and profit performance — all from a single dashboard backed by a live PostgreSQL database.
 
-**Live demo:** [bloomops.vercel.app](https://bloomops.vercel.app) &nbsp;·&nbsp; `admin@bloomops.com` / `admin123`
+**Live demo:** [bloomops-production.up.railway.app](https://bloomops-production.up.railway.app) &nbsp;·&nbsp; `admin@bloomops.com` / `admin123`
 
 ---
 
@@ -119,18 +119,18 @@ Open [http://localhost:3002](http://localhost:3002) and log in with `admin@bloom
 
 ## Deployment
 
-BloomOps deploys to Vercel with a Neon PostgreSQL database. The `postinstall` script runs `prisma generate` automatically during Vercel's build.
+BloomOps is deployed on [Railway](https://railway.app) with a PostgreSQL database. The `postinstall` script runs `prisma generate` automatically during the build. A `railway.json` config file is included in the repository.
 
-Required environment variables on Vercel:
+Required environment variables in the Railway dashboard:
 
 | Variable | Description |
 |----------|-------------|
-| `DATABASE_URL` | Neon pooled connection string |
-| `DIRECT_URL` | Neon direct connection string (for migrations) |
+| `DATABASE_URL` | Railway PostgreSQL connection string |
+| `DIRECT_URL` | Same as `DATABASE_URL` (Railway has no separate pooler) |
 | `AUTH_SECRET` | Random secret — generate with `npx auth secret` |
-| `AUTH_URL` | Your Vercel deployment URL |
+| `AUTH_URL` | Your Railway app URL, e.g. `https://bloomops-production.up.railway.app` |
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for the full step-by-step guide including migration setup, provider-specific URL formats, and known production risks.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the full step-by-step guide including schema setup and known production risks.
 
 ---
 

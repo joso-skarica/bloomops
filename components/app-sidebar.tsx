@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Leaf,
   LayoutDashboard,
   Package,
   Truck,
@@ -15,7 +16,6 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -37,13 +37,15 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border">
-        <Link href="/dashboard" className="flex items-center gap-2 px-2 py-4">
-          <span className="text-lg font-semibold">BloomOps</span>
+        <Link href="/dashboard" className="flex items-center gap-2.5 px-2 py-4">
+          <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <Leaf className="size-4" />
+          </div>
+          <span className="text-base font-semibold tracking-tight">BloomOps</span>
         </Link>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => (

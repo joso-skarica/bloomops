@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
@@ -38,13 +39,20 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center bg-muted/30 p-4">
-      <div className="w-full max-w-sm space-y-8 rounded-lg border bg-card p-8 shadow-sm">
-        <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-bold tracking-tight">BloomOps</h1>
-          <p className="text-sm text-muted-foreground">
-            Florist inventory management
-          </p>
+    <div className="flex min-h-svh flex-col items-center justify-center bg-muted/40 p-4">
+      <div className="w-full max-w-sm space-y-8 rounded-xl border bg-card p-8 shadow-lg">
+        <div className="space-y-4 text-center">
+          <div className="flex justify-center">
+            <div className="flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+              <Leaf className="size-6" />
+            </div>
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">BloomOps</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Florist inventory management
+            </p>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -86,19 +94,20 @@ export default function LoginPage() {
           )}
 
           <Button type="submit" className="w-full" disabled={isPending}>
-            {isPending ? "Signing in..." : "Sign in"}
+            {isPending ? "Signing in…" : "Sign in"}
           </Button>
         </form>
 
-        <p className="text-center text-xs text-muted-foreground">
-          Demo: admin@bloomops.com / admin123
-        </p>
-
-        <p className="text-center text-sm">
-          <Link href="/" className="text-primary underline hover:no-underline">
-            ← Back to home
-          </Link>
-        </p>
+        <div className="space-y-2 text-center">
+          <p className="text-xs text-muted-foreground">
+            Demo: admin@bloomops.com / admin123
+          </p>
+          <p className="text-sm">
+            <Link href="/" className="text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors">
+              ← Back to home
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

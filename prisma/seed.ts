@@ -1,15 +1,14 @@
 /**
- * BloomOps Seed Plan - Florist Inventory Sample Data
+ * BloomOps — Demo Seed Data
  *
- * This seed creates sample data for development and testing.
- * Run with: npx prisma db seed
+ * Creates a compact, realistic florist operations demo dataset.
+ * Run with: npm run db:seed
  *
- * SEED PLAN:
- * 1. Users - Demo admin user (for credentials auth, use seed to create DB user)
- * 2. Suppliers - 3-4 flower/plant wholesalers
- * 3. Products - Mix of flowers, plants, and supplies
- * 4. Shipments - 2-3 sample incoming shipments
- * 5. Orders - 2-3 sample customer orders
+ * Data set:
+ *   4 suppliers  — flowers, greenery, packaging, studio supplies
+ *   9 products   — flowers, greenery, wrapping supplies, accessories
+ *   2 shipments  — one flower delivery, one packaging delivery
+ *   3 orders     — fulfilled, confirmed, and draft states
  */
 
 import { PrismaClient } from "@prisma/client";
@@ -17,21 +16,22 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Seeding BloomOps database...");
+  console.log("Seeding BloomOps database...");
 
-  // 1. Suppliers
+  // ─── Suppliers ───────────────────────────────────────────────────────────
+
   const suppliers = await Promise.all([
     prisma.supplier.upsert({
       where: { id: "seed-supplier-1" },
       update: {},
       create: {
         id: "seed-supplier-1",
-        name: "Dutch Flower Co.",
-        contact: "Jan van der Berg",
-        email: "orders@dutchflower.co",
-        phone: "+31 20 123 4567",
-        address: "Amsterdam, Netherlands",
-        notes: "Premium roses and tulips",
+        name: "Dalmatia Flowers Supply",
+        contact: "Luka Horvat",
+        email: "orders@dalmatiaflowers.hr",
+        phone: "+385 21 555 0101",
+        address: "Marmontova 12, 21000 Split, Croatia",
+        notes: "Primary supplier for roses, tulips, and seasonal cut flowers.",
       },
     }),
     prisma.supplier.upsert({
@@ -39,12 +39,12 @@ async function main() {
       update: {},
       create: {
         id: "seed-supplier-2",
-        name: "Ecuador Blooms",
-        contact: "Maria Garcia",
-        email: "sales@ecuadorblooms.com",
-        phone: "+593 2 234 5678",
-        address: "Quito, Ecuador",
-        notes: "Roses, carnations, tropical flowers",
+        name: "Adriatic Floral Wholesale",
+        contact: "Maja Blažević",
+        email: "wholesale@adriaticfloral.com",
+        phone: "+385 51 555 0202",
+        address: "Korzo 8, 51000 Rijeka, Croatia",
+        notes: "Greenery, eucalyptus, seasonal mixed bouquets.",
       },
     }),
     prisma.supplier.upsert({
@@ -52,189 +52,318 @@ async function main() {
       update: {},
       create: {
         id: "seed-supplier-3",
-        name: "Greenhouse Plants Ltd",
-        contact: "Tom Wilson",
-        email: "wholesale@greenhouseplants.com",
-        phone: "+44 20 345 6789",
-        address: "London, UK",
-        notes: "Potted plants, succulents, foliage",
+        name: "Mediteran Packaging",
+        contact: "Ivan Perić",
+        email: "sales@mediteranpkg.com",
+        phone: "+385 1 555 0303",
+        address: "Ilica 44, 10000 Zagreb, Croatia",
+        notes: "Kraft paper, ribbon, greeting cards, and wrapping supplies.",
+      },
+    }),
+    prisma.supplier.upsert({
+      where: { id: "seed-supplier-4" },
+      update: {},
+      create: {
+        id: "seed-supplier-4",
+        name: "Flora Studio Partners",
+        contact: "Ana Kovačević",
+        email: "info@florastudiopartners.com",
+        phone: "+385 20 555 0404",
+        address: "Stradun 3, 20000 Dubrovnik, Croatia",
+        notes: "Vases, floral foam, decorative accessories.",
       },
     }),
   ]);
 
-  console.log(`  ✓ Created ${suppliers.length} suppliers`);
+  console.log(`  Created ${suppliers.length} suppliers`);
 
-  // 2. Products
+  const [dalmatia, adriatic, mediteran, floraStudio] = suppliers;
+
+  // ─── Products ────────────────────────────────────────────────────────────
+
   const products = await Promise.all([
+    // Flowers
     prisma.product.upsert({
       where: { sku: "ROSE-RED-001" },
       update: {},
       create: {
-        name: "Red Roses (Dozen)",
+        name: "Red Roses",
         sku: "ROSE-RED-001",
         category: "flowers",
         unit: "bunch",
-        costPrice: 8.5,
+        costPrice: 8.50,
         sellPrice: 24.99,
-        stockQty: 50,
-        minStock: 10,
-        supplierId: suppliers[0].id,
-        description: "Premium long-stem red roses",
-      },
-    }),
-    prisma.product.upsert({
-      where: { sku: "TULIP-MIX-002" },
-      update: {},
-      create: {
-        name: "Mixed Tulips (10 stems)",
-        sku: "TULIP-MIX-002",
-        category: "flowers",
-        unit: "bunch",
-        costPrice: 4.2,
-        sellPrice: 12.99,
-        stockQty: 80,
-        minStock: 20,
-        supplierId: suppliers[0].id,
-        description: "Assorted color tulips",
-      },
-    }),
-    prisma.product.upsert({
-      where: { sku: "ROSE-PINK-003" },
-      update: {},
-      create: {
-        name: "Pink Roses (Dozen)",
-        sku: "ROSE-PINK-003",
-        category: "flowers",
-        unit: "bunch",
-        costPrice: 9.0,
-        sellPrice: 26.99,
-        stockQty: 35,
-        minStock: 10,
-        supplierId: suppliers[1].id,
-        description: "Ecuadorian pink roses",
-      },
-    }),
-    prisma.product.upsert({
-      where: { sku: "CARN-WHT-004" },
-      update: {},
-      create: {
-        name: "White Carnations (20 stems)",
-        sku: "CARN-WHT-004",
-        category: "flowers",
-        unit: "bunch",
-        costPrice: 6.5,
-        sellPrice: 18.99,
         stockQty: 60,
         minStock: 15,
-        supplierId: suppliers[1].id,
-        description: "Fresh white carnations",
+        supplierId: dalmatia.id,
+        description: "Dozen long-stem red roses. Order cut fresh weekly.",
       },
     }),
     prisma.product.upsert({
-      where: { sku: "SUCC-MIX-005" },
+      where: { sku: "TULIP-WHT-002" },
       update: {},
       create: {
-        name: "Succulent Arrangement (Small)",
-        sku: "SUCC-MIX-005",
-        category: "plants",
+        name: "White Tulips",
+        sku: "TULIP-WHT-002",
+        category: "flowers",
+        unit: "bunch",
+        costPrice: 4.50,
+        sellPrice: 13.99,
+        stockQty: 80,
+        minStock: 20,
+        supplierId: dalmatia.id,
+        description: "10 stems of white Dutch tulips.",
+      },
+    }),
+    prisma.product.upsert({
+      where: { sku: "EUCAL-003" },
+      update: {},
+      create: {
+        name: "Eucalyptus Stems",
+        sku: "EUCAL-003",
+        category: "flowers",
+        unit: "bunch",
+        costPrice: 2.80,
+        sellPrice: 8.99,
+        stockQty: 120,
+        minStock: 30,
+        supplierId: adriatic.id,
+        description: "5 fresh eucalyptus stems. Used as filler in arrangements.",
+      },
+    }),
+    prisma.product.upsert({
+      where: { sku: "BOUQ-SEA-004" },
+      update: {},
+      create: {
+        name: "Mixed Seasonal Bouquet",
+        sku: "BOUQ-SEA-004",
+        category: "flowers",
         unit: "each",
-        costPrice: 12.0,
-        sellPrice: 34.99,
-        stockQty: 25,
+        costPrice: 15.00,
+        sellPrice: 42.00,
+        stockQty: 18,
         minStock: 5,
-        supplierId: suppliers[2].id,
-        description: "3-piece succulent arrangement in ceramic pot",
+        supplierId: adriatic.id,
+        description: "Pre-arranged mixed bouquet using whatever is in season.",
       },
     }),
+
+    // Supplies
     prisma.product.upsert({
-      where: { sku: "VASE-CLEAR-006" },
+      where: { sku: "RIB-SAT-005" },
       update: {},
       create: {
-        name: "Clear Glass Vase (Medium)",
-        sku: "VASE-CLEAR-006",
+        name: "Satin Ribbon",
+        sku: "RIB-SAT-005",
         category: "supplies",
         unit: "each",
-        costPrice: 3.5,
-        sellPrice: 9.99,
-        stockQty: 100,
+        costPrice: 1.20,
+        sellPrice: 3.99,
+        stockQty: 200,
+        minStock: 50,
+        supplierId: mediteran.id,
+        description: "5 m roll. Available in ivory, blush, and forest green.",
+      },
+    }),
+    prisma.product.upsert({
+      where: { sku: "WRAP-KFT-006" },
+      update: {},
+      create: {
+        name: "Kraft Wrapping Paper",
+        sku: "WRAP-KFT-006",
+        category: "supplies",
+        unit: "each",
+        costPrice: 0.30,
+        sellPrice: 0.99,
+        stockQty: 500,
+        minStock: 100,
+        supplierId: mediteran.id,
+        description: "Single A2 sheet. Sold per sheet at counter.",
+      },
+    }),
+    prisma.product.upsert({
+      where: { sku: "CARD-BLK-007" },
+      update: {},
+      create: {
+        name: "Greeting Card",
+        sku: "CARD-BLK-007",
+        category: "supplies",
+        unit: "each",
+        costPrice: 0.50,
+        sellPrice: 2.49,
+        stockQty: 3,
         minStock: 20,
-        description: "Classic cylindrical glass vase",
+        supplierId: mediteran.id,
+        description: "Blank inside. Mix of floral and neutral designs.",
+      },
+    }),
+    prisma.product.upsert({
+      where: { sku: "VASE-CLR-008" },
+      update: {},
+      create: {
+        name: "Glass Vase",
+        sku: "VASE-CLR-008",
+        category: "supplies",
+        unit: "each",
+        costPrice: 3.50,
+        sellPrice: 9.99,
+        stockQty: 45,
+        minStock: 15,
+        supplierId: floraStudio.id,
+        description: "Clear cylindrical vase, 20 cm tall. Fits a standard dozen bouquet.",
+      },
+    }),
+    prisma.product.upsert({
+      where: { sku: "FOAM-BLK-009" },
+      update: {},
+      create: {
+        name: "Floral Foam Block",
+        sku: "FOAM-BLK-009",
+        category: "supplies",
+        unit: "each",
+        costPrice: 0.90,
+        sellPrice: 2.99,
+        stockQty: 150,
+        minStock: 40,
+        supplierId: floraStudio.id,
+        description: "Standard brick. Soakable. Used for structured arrangements.",
       },
     }),
   ]);
 
-  console.log(`  ✓ Created ${products.length} products`);
+  console.log(`  Created ${products.length} products`);
 
-  // 3. Shipments
-  const shipment = await prisma.shipment.upsert({
+  const [redRoses, whiteTulips, eucalyptus, mixedBouquet, ribbon, kraftPaper, greetingCard, glassVase, floralFoam] = products;
+
+  // ─── Shipments ───────────────────────────────────────────────────────────
+
+  const shipment1 = await prisma.shipment.upsert({
     where: { id: "seed-shipment-1" },
     update: {},
     create: {
       id: "seed-shipment-1",
-      supplierId: suppliers[0].id,
+      supplierId: dalmatia.id,
       status: "received",
-      expectedAt: new Date("2025-03-10"),
-      receivedAt: new Date("2025-03-10"),
-      notes: "Weekly rose delivery",
+      expectedAt: new Date("2025-06-02"),
+      receivedAt: new Date("2025-06-02"),
+      notes: "Weekly cut flower delivery.",
     },
   });
 
   await prisma.shipmentItem.createMany({
     data: [
-      {
-        shipmentId: shipment.id,
-        productId: products[0].id,
-        quantity: 100,
-        unitCost: 8.5,
-      },
-      {
-        shipmentId: shipment.id,
-        productId: products[1].id,
-        quantity: 50,
-        unitCost: 4.2,
-      },
+      { shipmentId: shipment1.id, productId: redRoses.id,    quantity: 80,  unitCost: 8.50 },
+      { shipmentId: shipment1.id, productId: whiteTulips.id, quantity: 100, unitCost: 4.50 },
+      { shipmentId: shipment1.id, productId: eucalyptus.id,  quantity: 150, unitCost: 2.80 },
     ],
     skipDuplicates: true,
   });
 
-  console.log("  ✓ Created 1 shipment with items");
+  const shipment2 = await prisma.shipment.upsert({
+    where: { id: "seed-shipment-2" },
+    update: {},
+    create: {
+      id: "seed-shipment-2",
+      supplierId: mediteran.id,
+      status: "received",
+      expectedAt: new Date("2025-06-05"),
+      receivedAt: new Date("2025-06-05"),
+      notes: "Monthly packaging restock.",
+    },
+  });
 
-  // 4. Orders
-  const order = await prisma.order.upsert({
+  await prisma.shipmentItem.createMany({
+    data: [
+      { shipmentId: shipment2.id, productId: ribbon.id,      quantity: 100, unitCost: 1.20 },
+      { shipmentId: shipment2.id, productId: kraftPaper.id,  quantity: 300, unitCost: 0.30 },
+      { shipmentId: shipment2.id, productId: greetingCard.id,quantity: 100, unitCost: 0.50 },
+    ],
+    skipDuplicates: true,
+  });
+
+  console.log("  Created 2 shipments with items");
+
+  // ─── Orders ──────────────────────────────────────────────────────────────
+
+  // Order 1 — fulfilled
+  const order1 = await prisma.order.upsert({
     where: { orderNumber: "ORD-2025-001" },
     update: {},
     create: {
       orderNumber: "ORD-2025-001",
       status: "fulfilled",
-      customerName: "Jane Smith",
-      customerEmail: "jane@example.com",
-      customerPhone: "+1 555 123 4567",
-      deliveryDate: new Date("2025-03-14"),
-      notes: "Birthday bouquet",
-      totalAmount: 49.98,
+      customerName: "Ana Kovač",
+      customerEmail: "ana.kovac@example.com",
+      customerPhone: "+385 98 123 4567",
+      deliveryDate: new Date("2025-06-07"),
+      notes: "Wedding anniversary. Requested red and white colour scheme.",
+      totalAmount: 61.97,
     },
   });
 
   await prisma.orderItem.createMany({
     data: [
-      {
-        orderId: order.id,
-        productId: products[0].id,
-        quantity: 2,
-        unitPrice: 24.99,
-      },
+      { orderId: order1.id, productId: redRoses.id,    quantity: 2, unitPrice: 24.99, unitCostSnapshot: 8.50 },
+      { orderId: order1.id, productId: glassVase.id,   quantity: 1, unitPrice: 9.99,  unitCostSnapshot: 3.50 },
+      { orderId: order1.id, productId: greetingCard.id,quantity: 1, unitPrice: 2.49,  unitCostSnapshot: 0.50 },
     ],
     skipDuplicates: true,
   });
 
-  console.log("  ✓ Created 1 sample order");
+  // Order 2 — confirmed
+  const order2 = await prisma.order.upsert({
+    where: { orderNumber: "ORD-2025-002" },
+    update: {},
+    create: {
+      orderNumber: "ORD-2025-002",
+      status: "confirmed",
+      customerName: "Marko Perić",
+      customerEmail: "marko.peric@example.com",
+      customerPhone: "+385 91 234 5678",
+      deliveryDate: new Date("2025-06-12"),
+      notes: "Birthday gift. Please include a card.",
+      totalAmount: 47.96,
+    },
+  });
 
-  console.log("✅ Seed completed successfully!");
+  await prisma.orderItem.createMany({
+    data: [
+      { orderId: order2.id, productId: whiteTulips.id, quantity: 2, unitPrice: 13.99, unitCostSnapshot: 4.50 },
+      { orderId: order2.id, productId: eucalyptus.id,  quantity: 2, unitPrice: 8.99,  unitCostSnapshot: 2.80 },
+      { orderId: order2.id, productId: greetingCard.id,quantity: 1, unitPrice: 2.49,  unitCostSnapshot: 0.50 },
+    ],
+    skipDuplicates: true,
+  });
+
+  // Order 3 — draft
+  const order3 = await prisma.order.upsert({
+    where: { orderNumber: "ORD-2025-003" },
+    update: {},
+    create: {
+      orderNumber: "ORD-2025-003",
+      status: "draft",
+      customerName: "Petra Blažević",
+      customerEmail: "petra.blazevic@example.com",
+      deliveryDate: new Date("2025-06-15"),
+      notes: "Mother's Day table centrepiece. Still confirming quantity.",
+      totalAmount: 42.00,
+    },
+  });
+
+  await prisma.orderItem.createMany({
+    data: [
+      { orderId: order3.id, productId: mixedBouquet.id, quantity: 1, unitPrice: 42.00, unitCostSnapshot: 15.00 },
+    ],
+    skipDuplicates: true,
+  });
+
+  console.log("  Created 3 sample orders");
+  console.log("Seed completed.");
 }
 
 main()
   .catch((e) => {
-    console.error("❌ Seed failed:", e);
+    console.error("Seed failed:", e);
     process.exit(1);
   })
   .finally(async () => {

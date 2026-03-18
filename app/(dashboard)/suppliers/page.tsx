@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Mail, Phone } from "lucide-react";
+import { Plus, Mail, Phone, Building2 } from "lucide-react";
 
 export default async function SuppliersPage() {
   const suppliers = await getSuppliers();
@@ -33,11 +33,17 @@ export default async function SuppliersPage() {
       </div>
 
       {suppliers.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-          No suppliers yet. Add your first supplier to get started.
+        <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed p-12 text-center">
+          <Building2 className="size-10 text-muted-foreground/40" />
+          <div>
+            <p className="font-medium text-foreground">No suppliers yet</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Add your first supplier to get started.
+            </p>
+          </div>
         </div>
       ) : (
-        <div className="rounded-lg border">
+        <div className="rounded-xl border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -54,7 +60,7 @@ export default async function SuppliersPage() {
                   <TableCell>
                     <Link
                       href={`/suppliers/${supplier.id}`}
-                      className="font-medium hover:underline"
+                      className="font-medium hover:underline underline-offset-4"
                     >
                       {supplier.name}
                     </Link>

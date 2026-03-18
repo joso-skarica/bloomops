@@ -119,9 +119,9 @@ Prisma maps `DECIMAL` columns to its own `Decimal` class. Next.js requires plain
 
 The shadcn/ui components in this project are built on Base UI primitives rather than Radix. Base UI enforces stricter context requirements: `GroupLabel` must be a direct child of `Group`, not a free-floating child of the popup. This caused a silent context error in the header dropdown that was not caught at build time, only at runtime.
 
-**Connection pooling in serverless**
+**Connection pooling and database URL configuration**
 
-Vercel's serverless functions can open a new database connection per invocation. Neon provides separate pooled and direct connection URLs; Prisma needs `directUrl` for migrations and `url` for runtime queries. Configuring both in `schema.prisma` and the environment correctly required understanding how PgBouncer interacts with Prisma's prepared statements.
+Neon provides separate pooled and direct connection URLs. Prisma needs `directUrl` for migrations and `url` for runtime queries. Configuring both in `schema.prisma` and the environment correctly required understanding how PgBouncer interacts with Prisma's prepared statements. The app is deployed on Railway, which uses a persistent Node.js process and does not require a separate pooler URL.
 
 **Profit calculation accuracy**
 

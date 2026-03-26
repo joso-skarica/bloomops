@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -14,8 +13,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getOrders } from "@/lib/actions/orders";
-import { formatCurrency, getOrderStatusVariant } from "@/lib/format";
+import { DEMO_ORDERS } from "@/lib/demo-data";
+import { formatCurrency, formatDate, getOrderStatusVariant } from "@/lib/format";
 import { OrderSearch } from "@/components/orders/order-search";
+import { ShoppingCart } from "lucide-react";
 
 export default async function OrdersPage({
   searchParams,
@@ -23,7 +24,11 @@ export default async function OrdersPage({
   searchParams: Promise<{ search?: string; status?: string }>;
 }) {
   const sp = await searchParams;
-  const orders = await getOrders({ search: sp.search, status: sp.status });
+  const dbOrders = await getOrders({ search: sp.search, status: sp.status });
+
+  const hasFilters = !!(sp.search || sp.status);
+  const useDemo = dbOrders.length === 0 && !hasFilters;
+  const orders = useDemo ? DEMO_ORDERS : dbOrders;
 
   return (
     <div className="space-y-6">
@@ -41,15 +46,22 @@ export default async function OrdersPage({
         <OrderSearch />
       </Suspense>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            {orders.length === 0 && (sp.search || sp.status)
-              ? "No orders match your filters"
-              : `All Orders`}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+      {orders.length === 0 ? (
+        <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed p-12 text-center">
+          <ShoppingCart className="size-10 text-muted-foreground/40" />
+          <div>
+            <p className="font-medium text-foreground">
+              {hasFilters ? "No orders match your filters" : "No orders yet"}
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {hasFilters
+                ? "Try adjusting your search or filters."
+                : "Create your first order to get started."}
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-xl border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -61,41 +73,34 @@ export default async function OrdersPage({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orders.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">
-                    {sp.search || sp.status
-                      ? "No orders match your filters."
-                      : "No orders yet."}
+              {orders.map((order) => (
+                <TableRow key={order.id}>
+                  <TableCell>
+                    <Link
+                      href={useDemo ? "#" : `/orders/${order.id}`}
+                      className="font-medium hover:underline underline-offset-4"
+                    >
+                      {order.orderNumber}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{order.customerName || "-"}</TableCell>
+                  <TableCell>
+                    <Badge variant={getOrderStatusVariant(order.status)}>{order.status}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    {order.deliveryDate
+                      ? formatDate(new Date(order.deliveryDate))
+                      : "-"}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {formatCurrency(Number(order.totalAmount))}
                   </TableCell>
                 </TableRow>
-              ) : (
-                orders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell>
-                      <Link href={`/orders/${order.id}`} className="underline">
-                        {order.orderNumber}
-                      </Link>
-                    </TableCell>
-                    <TableCell>{order.customerName || "-"}</TableCell>
-                    <TableCell>
-                      <Badge variant={getOrderStatusVariant(order.status)}>{order.status}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      {order.deliveryDate
-                        ? new Date(order.deliveryDate).toLocaleDateString()
-                        : "-"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(Number(order.totalAmount))}
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
+              ))}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
+        </div>
+      )}
     </div>
   );
 }

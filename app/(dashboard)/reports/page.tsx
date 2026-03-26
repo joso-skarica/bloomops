@@ -11,10 +11,19 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { getReportsData } from "@/lib/actions/reports";
+import { DEMO_REPORTS } from "@/lib/demo-data";
 import { formatCurrency, formatNumber } from "@/lib/format";
 
 export default async function ReportsPage() {
-  const data = await getReportsData();
+  const dbData = await getReportsData();
+
+  const dbIsEmpty =
+    dbData.stockValueSummary.length === 0 &&
+    dbData.lowStockProducts.length === 0 &&
+    dbData.topSellingProducts.length === 0 &&
+    dbData.monthlySalesTotals.every((m) => m.totalSales === 0);
+
+  const data = dbIsEmpty ? DEMO_REPORTS : dbData;
 
   const totalStockValue = data.stockValueSummary.reduce(
     (sum, row) => sum + row.totalValue,
@@ -51,7 +60,7 @@ export default async function ReportsPage() {
             <TableBody>
               {data.stockValueSummary.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center text-muted-foreground">
+                  <TableCell colSpan={3} className="py-8 text-center text-muted-foreground">
                     No products in stock.
                   </TableCell>
                 </TableRow>
@@ -101,7 +110,7 @@ export default async function ReportsPage() {
             <TableBody>
               {data.lowStockProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
                     All products are sufficiently stocked.
                   </TableCell>
                 </TableRow>
@@ -145,7 +154,7 @@ export default async function ReportsPage() {
             <TableBody>
               {data.topSellingProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">
+                  <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
                     No fulfilled orders yet.
                   </TableCell>
                 </TableRow>
@@ -182,7 +191,7 @@ export default async function ReportsPage() {
               <TableBody>
                 {data.monthlySalesTotals.every((m) => m.totalSales === 0) ? (
                   <TableRow>
-                    <TableCell colSpan={2} className="text-center text-muted-foreground">
+                    <TableCell colSpan={2} className="py-8 text-center text-muted-foreground">
                       No sales data.
                     </TableCell>
                   </TableRow>
@@ -214,7 +223,7 @@ export default async function ReportsPage() {
               <TableBody>
                 {data.monthlyGrossProfitTotals.every((m) => m.grossProfit === 0) ? (
                   <TableRow>
-                    <TableCell colSpan={2} className="text-center text-muted-foreground">
+                    <TableCell colSpan={2} className="py-8 text-center text-muted-foreground">
                       No profit data.
                     </TableCell>
                   </TableRow>

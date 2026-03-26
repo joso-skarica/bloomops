@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { getProducts } from "@/lib/actions/products";
+import { DEMO_PRODUCTS } from "@/lib/demo-data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -26,11 +27,15 @@ export default async function ProductsPage({
   }>;
 }) {
   const sp = await searchParams;
-  const products = await getProducts({
+  const dbProducts = await getProducts({
     search: sp.search,
     category: sp.category,
     showArchived: sp.archived === "true",
   });
+
+  const hasFilters = !!(sp.search || sp.category);
+  const useDemo = dbProducts.length === 0 && !hasFilters;
+  const products = useDemo ? DEMO_PRODUCTS : dbProducts;
 
   return (
     <div className="space-y-6">
@@ -58,10 +63,10 @@ export default async function ProductsPage({
           <Package className="size-10 text-muted-foreground/40" />
           <div>
             <p className="font-medium text-foreground">
-              {sp.search || sp.category ? "No products match your filters" : "No products yet"}
+              {hasFilters ? "No products match your filters" : "No products yet"}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              {sp.search || sp.category
+              {hasFilters
                 ? "Try adjusting your search or filters."
                 : "Add your first product to get started."}
             </p>
@@ -79,7 +84,7 @@ export default async function ProductsPage({
                 <TableHead className="text-right">Cost</TableHead>
                 <TableHead className="text-right">Sell</TableHead>
                 <TableHead className="text-right">Stock</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                {!useDemo && <TableHead className="text-right">Actions</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -96,7 +101,7 @@ export default async function ProductsPage({
                   >
                     <TableCell>
                       <Link
-                        href={`/products/${product.id}`}
+                        href={useDemo ? "#" : `/products/${product.id}`}
                         className="font-medium hover:underline underline-offset-4"
                       >
                         {product.name}
@@ -130,13 +135,15 @@ export default async function ProductsPage({
                         {product.stockQty}
                       </span>
                     </TableCell>
-                    <TableCell className="text-right">
-                      <ArchiveProductButton
-                        id={product.id}
-                        name={product.name}
-                        isActive={product.isActive}
-                      />
-                    </TableCell>
+                    {!useDemo && (
+                      <TableCell className="text-right">
+                        <ArchiveProductButton
+                          id={product.id}
+                          name={product.name}
+                          isActive={product.isActive}
+                        />
+                      </TableCell>
+                    )}
                   </TableRow>
                 );
               })}

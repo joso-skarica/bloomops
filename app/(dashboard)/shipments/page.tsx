@@ -1,8 +1,8 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { formatCurrency, getShipmentStatusVariant } from "@/lib/format";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatCurrency, formatDate, getShipmentStatusVariant } from "@/lib/format";
+import { DEMO_SHIPMENTS } from "@/lib/demo-data";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -13,10 +13,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { PackageCheck } from "lucide-react";
 import { getShipments } from "@/lib/actions/shipments";
 
 export default async function ShipmentsPage() {
-  const shipments = await getShipments();
+  const dbShipments = await getShipments();
+
+  const useDemo = dbShipments.length === 0;
 
   return (
     <div className="space-y-6">
@@ -30,11 +33,8 @@ export default async function ShipmentsPage() {
         </Link>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>All Shipments</CardTitle>
-        </CardHeader>
-        <CardContent>
+      {useDemo ? (
+        <div className="rounded-xl border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -46,44 +46,79 @@ export default async function ShipmentsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {shipments.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">
-                    No shipments yet.
+              {DEMO_SHIPMENTS.map((shipment) => (
+                <TableRow key={shipment.id}>
+                  <TableCell>
+                    <Link href="#" className="font-medium hover:underline underline-offset-4">
+                      {shipment.id.replace("demo-", "").toUpperCase()}
+                    </Link>
                   </TableCell>
+                  <TableCell>{shipment.supplier.name}</TableCell>
+                  <TableCell>
+                    <Badge variant={getShipmentStatusVariant(shipment.status)}>{shipment.status}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    {shipment.receivedAt ? formatDate(new Date(shipment.receivedAt)) : "-"}
+                  </TableCell>
+                  <TableCell className="text-right">{formatCurrency(shipment.total)}</TableCell>
                 </TableRow>
-              ) : (
-                shipments.map((shipment) => {
-                  const total = shipment.shipmentItems.reduce(
-                    (sum, item) => sum + Number(item.unitCost) * item.quantity,
-                    0
-                  );
-
-                  return (
-                    <TableRow key={shipment.id}>
-                      <TableCell>
-                        <Link href={`/shipments/${shipment.id}`} className="underline">
-                          {shipment.id.slice(0, 8)}...
-                        </Link>
-                      </TableCell>
-                      <TableCell>{shipment.supplier.name}</TableCell>
-                      <TableCell>
-                        <Badge variant={getShipmentStatusVariant(shipment.status)}>{shipment.status}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        {shipment.receivedAt
-                          ? new Date(shipment.receivedAt).toLocaleDateString()
-                          : "-"}
-                      </TableCell>
-                      <TableCell className="text-right">{formatCurrency(total)}</TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
+              ))}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
+        </div>
+      ) : dbShipments.length === 0 ? (
+        <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed p-12 text-center">
+          <PackageCheck className="size-10 text-muted-foreground/40" />
+          <div>
+            <p className="font-medium text-foreground">No shipments yet</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Create your first shipment to start tracking inventory.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-xl border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Shipment ID</TableHead>
+                <TableHead>Supplier</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Received</TableHead>
+                <TableHead className="text-right">Total</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {dbShipments.map((shipment) => {
+                const total = shipment.shipmentItems.reduce(
+                  (sum, item) => sum + Number(item.unitCost) * item.quantity,
+                  0
+                );
+
+                return (
+                  <TableRow key={shipment.id}>
+                    <TableCell>
+                      <Link href={`/shipments/${shipment.id}`} className="font-medium hover:underline underline-offset-4">
+                        {shipment.id.slice(0, 8)}...
+                      </Link>
+                    </TableCell>
+                    <TableCell>{shipment.supplier.name}</TableCell>
+                    <TableCell>
+                      <Badge variant={getShipmentStatusVariant(shipment.status)}>{shipment.status}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      {shipment.receivedAt
+                        ? formatDate(shipment.receivedAt)
+                        : "-"}
+                    </TableCell>
+                    <TableCell className="text-right">{formatCurrency(total)}</TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   );
 }

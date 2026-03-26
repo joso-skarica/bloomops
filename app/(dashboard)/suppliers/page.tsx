@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getSuppliers } from "@/lib/actions/suppliers";
+import { DEMO_SUPPLIERS } from "@/lib/demo-data";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -13,7 +14,10 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Mail, Phone, Building2 } from "lucide-react";
 
 export default async function SuppliersPage() {
-  const suppliers = await getSuppliers();
+  const dbSuppliers = await getSuppliers();
+
+  const useDemo = dbSuppliers.length === 0;
+  const suppliers = useDemo ? DEMO_SUPPLIERS : dbSuppliers;
 
   return (
     <div className="space-y-6">
@@ -59,7 +63,7 @@ export default async function SuppliersPage() {
                 <TableRow key={supplier.id}>
                   <TableCell>
                     <Link
-                      href={`/suppliers/${supplier.id}`}
+                      href={useDemo ? "#" : `/suppliers/${supplier.id}`}
                       className="font-medium hover:underline underline-offset-4"
                     >
                       {supplier.name}

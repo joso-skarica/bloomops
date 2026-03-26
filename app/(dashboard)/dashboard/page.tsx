@@ -22,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getDashboardData } from "@/lib/actions/dashboard";
+import { DEMO_DASHBOARD } from "@/lib/demo-data";
 import { formatCurrency, formatDate, formatNumber, getOrderStatusVariant, getShipmentStatusVariant } from "@/lib/format";
 import { MonthlyChart } from "@/components/dashboard/monthly-chart";
 
@@ -36,7 +37,10 @@ const kpiIcons = {
 } as const;
 
 export default async function DashboardPage() {
-  const data = await getDashboardData();
+  const dbData = await getDashboardData();
+
+  const useDemo = dbData.totalActiveProducts === 0;
+  const data = useDemo ? DEMO_DASHBOARD : dbData;
 
   const kpis = [
     {
@@ -175,7 +179,10 @@ export default async function DashboardPage() {
                   data.recentShipments.map((s) => (
                     <TableRow key={s.id}>
                       <TableCell>
-                        <Link href={`/shipments/${s.id}`} className="font-medium hover:underline underline-offset-4">
+                        <Link
+                          href={useDemo ? "#" : `/shipments/${s.id}`}
+                          className="font-medium hover:underline underline-offset-4"
+                        >
                           {s.supplierName}
                         </Link>
                       </TableCell>
@@ -221,7 +228,10 @@ export default async function DashboardPage() {
                   data.recentOrders.map((o) => (
                     <TableRow key={o.id}>
                       <TableCell>
-                        <Link href={`/orders/${o.id}`} className="font-medium hover:underline underline-offset-4">
+                        <Link
+                          href={useDemo ? "#" : `/orders/${o.id}`}
+                          className="font-medium hover:underline underline-offset-4"
+                        >
                           {o.orderNumber}
                         </Link>
                       </TableCell>

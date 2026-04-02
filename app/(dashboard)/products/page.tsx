@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { getProducts } from "@/lib/actions/products";
-import { DEMO_PRODUCTS } from "@/lib/demo-data";
+import { DEMO_PRODUCTS, isDemoEnabled } from "@/lib/demo-data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -34,7 +34,7 @@ export default async function ProductsPage({
   });
 
   const hasFilters = !!(sp.search || sp.category);
-  const useDemo = dbProducts.length === 0 && !hasFilters;
+  const useDemo = dbProducts.length === 0 && !hasFilters && isDemoEnabled();
   const products = useDemo ? DEMO_PRODUCTS : dbProducts;
 
   return (
@@ -100,12 +100,16 @@ export default async function ProductsPage({
                     className={!product.isActive ? "opacity-50" : ""}
                   >
                     <TableCell>
-                      <Link
-                        href={useDemo ? "#" : `/products/${product.id}`}
-                        className="font-medium hover:underline underline-offset-4"
-                      >
-                        {product.name}
-                      </Link>
+                      {useDemo ? (
+                        <span className="font-medium">{product.name}</span>
+                      ) : (
+                        <Link
+                          href={`/products/${product.id}`}
+                          className="font-medium hover:underline underline-offset-4"
+                        >
+                          {product.name}
+                        </Link>
+                      )}
                       {!product.isActive && (
                         <Badge variant="outline" className="ml-2 text-xs">
                           Archived

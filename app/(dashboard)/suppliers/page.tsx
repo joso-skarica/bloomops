@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getSuppliers } from "@/lib/actions/suppliers";
-import { DEMO_SUPPLIERS } from "@/lib/demo-data";
+import { DEMO_SUPPLIERS, isDemoEnabled } from "@/lib/demo-data";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -16,7 +16,7 @@ import { Plus, Mail, Phone, Building2 } from "lucide-react";
 export default async function SuppliersPage() {
   const dbSuppliers = await getSuppliers();
 
-  const useDemo = dbSuppliers.length === 0;
+  const useDemo = dbSuppliers.length === 0 && isDemoEnabled();
   const suppliers = useDemo ? DEMO_SUPPLIERS : dbSuppliers;
 
   return (
@@ -62,12 +62,16 @@ export default async function SuppliersPage() {
               {suppliers.map((supplier) => (
                 <TableRow key={supplier.id}>
                   <TableCell>
-                    <Link
-                      href={useDemo ? "#" : `/suppliers/${supplier.id}`}
-                      className="font-medium hover:underline underline-offset-4"
-                    >
-                      {supplier.name}
-                    </Link>
+                    {useDemo ? (
+                      <span className="font-medium">{supplier.name}</span>
+                    ) : (
+                      <Link
+                        href={`/suppliers/${supplier.id}`}
+                        className="font-medium hover:underline underline-offset-4"
+                      >
+                        {supplier.name}
+                      </Link>
+                    )}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {supplier.contact || "—"}

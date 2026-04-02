@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { formatCurrency, getOrderStatusVariant } from "@/lib/format";
+import { formatCurrency, formatDate, getOrderStatusVariant } from "@/lib/format";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -52,32 +52,43 @@ export default async function OrderDetailPage({
             <Badge variant={getOrderStatusVariant(order.status)}>{order.status}</Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-2 text-sm md:grid-cols-2">
+        <CardContent className="grid gap-3 text-sm md:grid-cols-2">
           <p>
-            <span className="font-medium">Customer:</span> {order.customerName || "-"}
+            <span className="font-medium text-muted-foreground">Customer</span>
+            <br />
+            <span className="font-medium">{order.customerName || "-"}</span>
           </p>
           <p>
-            <span className="font-medium">Email:</span> {order.customerEmail || "-"}
+            <span className="font-medium text-muted-foreground">Email</span>
+            <br />
+            {order.customerEmail || "-"}
           </p>
           <p>
-            <span className="font-medium">Phone:</span> {order.customerPhone || "-"}
+            <span className="font-medium text-muted-foreground">Phone</span>
+            <br />
+            {order.customerPhone || "-"}
           </p>
           <p>
-            <span className="font-medium">Delivery:</span>{" "}
+            <span className="font-medium text-muted-foreground">Delivery</span>
+            <br />
             {order.deliveryDate
-              ? new Date(order.deliveryDate).toLocaleDateString()
+              ? formatDate(order.deliveryDate)
               : "-"}
           </p>
           <p>
-            <span className="font-medium">Created:</span>{" "}
-            {new Date(order.createdAt).toLocaleString()}
+            <span className="font-medium text-muted-foreground">Created</span>
+            <br />
+            {formatDate(order.createdAt)}
           </p>
           <p>
-            <span className="font-medium">Updated:</span>{" "}
-            {new Date(order.updatedAt).toLocaleString()}
+            <span className="font-medium text-muted-foreground">Updated</span>
+            <br />
+            {formatDate(order.updatedAt)}
           </p>
           <p className="md:col-span-2">
-            <span className="font-medium">Notes:</span> {order.notes || "-"}
+            <span className="font-medium text-muted-foreground">Notes</span>
+            <br />
+            {order.notes || "-"}
           </p>
         </CardContent>
       </Card>
@@ -104,8 +115,8 @@ export default async function OrderDetailPage({
 
                 return (
                   <TableRow key={item.id}>
-                    <TableCell>{item.product.name}</TableCell>
-                    <TableCell>{item.product.sku ?? "-"}</TableCell>
+                    <TableCell className="font-medium">{item.product.name}</TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">{item.product.sku ?? "-"}</TableCell>
                     <TableCell>{item.quantity}</TableCell>
                     <TableCell className="text-right">
                       {formatCurrency(Number(item.unitPrice))}

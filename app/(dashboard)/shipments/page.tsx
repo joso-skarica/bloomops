@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { formatCurrency, formatDate, getShipmentStatusVariant } from "@/lib/format";
-import { DEMO_SHIPMENTS } from "@/lib/demo-data";
+import { DEMO_SHIPMENTS, isDemoEnabled } from "@/lib/demo-data";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -19,7 +19,7 @@ import { getShipments } from "@/lib/actions/shipments";
 export default async function ShipmentsPage() {
   const dbShipments = await getShipments();
 
-  const useDemo = dbShipments.length === 0;
+  const useDemo = dbShipments.length === 0 && isDemoEnabled();
 
   return (
     <div className="space-y-6">
@@ -49,9 +49,9 @@ export default async function ShipmentsPage() {
               {DEMO_SHIPMENTS.map((shipment) => (
                 <TableRow key={shipment.id}>
                   <TableCell>
-                    <Link href="#" className="font-medium hover:underline underline-offset-4">
+                    <span className="font-medium">
                       {shipment.id.replace("demo-", "").toUpperCase()}
-                    </Link>
+                    </span>
                   </TableCell>
                   <TableCell>{shipment.supplier.name}</TableCell>
                   <TableCell>
@@ -107,9 +107,7 @@ export default async function ShipmentsPage() {
                       <Badge variant={getShipmentStatusVariant(shipment.status)}>{shipment.status}</Badge>
                     </TableCell>
                     <TableCell>
-                      {shipment.receivedAt
-                        ? formatDate(shipment.receivedAt)
-                        : "-"}
+                      {shipment.receivedAt ? formatDate(shipment.receivedAt) : "-"}
                     </TableCell>
                     <TableCell className="text-right">{formatCurrency(total)}</TableCell>
                   </TableRow>

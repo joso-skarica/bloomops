@@ -2,8 +2,15 @@
  * Static demo data for BloomOps.
  *
  * Used by list pages to display realistic placeholder content when
- * the database is empty. No DB connection or seed required.
+ * the database is empty and SHOW_DEMO_CONTENT is enabled.
+ *
+ * Enable: set SHOW_DEMO_CONTENT=true in .env
+ * Disable: remove or set to anything else (default off)
  */
+
+export function isDemoEnabled(): boolean {
+  return process.env.SHOW_DEMO_CONTENT === "true";
+}
 
 // ─── Products ──────────────────────────────────────────────────────────────
 

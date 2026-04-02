@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { getReportsData } from "@/lib/actions/reports";
-import { DEMO_REPORTS } from "@/lib/demo-data";
+import { DEMO_REPORTS, isDemoEnabled } from "@/lib/demo-data";
 import { formatCurrency, formatNumber } from "@/lib/format";
 
 export default async function ReportsPage() {
@@ -23,7 +23,7 @@ export default async function ReportsPage() {
     dbData.topSellingProducts.length === 0 &&
     dbData.monthlySalesTotals.every((m) => m.totalSales === 0);
 
-  const data = dbIsEmpty ? DEMO_REPORTS : dbData;
+  const data = dbIsEmpty && isDemoEnabled() ? DEMO_REPORTS : dbData;
 
   const totalStockValue = data.stockValueSummary.reduce(
     (sum, row) => sum + row.totalValue,

@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
-import { formatCurrency, getShipmentStatusVariant } from "@/lib/format";
+import { formatCurrency, formatDate, getShipmentStatusVariant } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -35,7 +35,7 @@ export default async function ShipmentDetailPage({
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Shipment Detail</h1>
-        <p className="text-muted-foreground">Shipment {shipment.id}</p>
+        <p className="text-muted-foreground">Shipment {shipment.id.slice(0, 8)}...</p>
       </div>
 
       <Card>
@@ -45,28 +45,35 @@ export default async function ShipmentDetailPage({
             <Badge variant={getShipmentStatusVariant(shipment.status)}>{shipment.status}</Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-2 text-sm md:grid-cols-2">
+        <CardContent className="grid gap-3 text-sm md:grid-cols-2">
           <p>
-            <span className="font-medium">Supplier:</span> {shipment.supplier.name}
+            <span className="font-medium text-muted-foreground">Supplier</span>
+            <br />
+            <span className="font-medium">{shipment.supplier.name}</span>
           </p>
           <p>
-            <span className="font-medium">Received:</span>{" "}
+            <span className="font-medium text-muted-foreground">Received</span>
+            <br />
             {shipment.receivedAt
-              ? new Date(shipment.receivedAt).toLocaleString()
+              ? formatDate(shipment.receivedAt)
               : "Not received"}
           </p>
           <p>
-            <span className="font-medium">Expected:</span>{" "}
+            <span className="font-medium text-muted-foreground">Expected</span>
+            <br />
             {shipment.expectedAt
-              ? new Date(shipment.expectedAt).toLocaleDateString()
+              ? formatDate(shipment.expectedAt)
               : "-"}
           </p>
           <p>
-            <span className="font-medium">Created:</span>{" "}
-            {new Date(shipment.createdAt).toLocaleString()}
+            <span className="font-medium text-muted-foreground">Created</span>
+            <br />
+            {formatDate(shipment.createdAt)}
           </p>
           <p className="md:col-span-2">
-            <span className="font-medium">Notes:</span> {shipment.notes || "-"}
+            <span className="font-medium text-muted-foreground">Notes</span>
+            <br />
+            {shipment.notes || "-"}
           </p>
         </CardContent>
       </Card>
@@ -92,8 +99,8 @@ export default async function ShipmentDetailPage({
 
                 return (
                   <TableRow key={item.id}>
-                    <TableCell>{item.product.name}</TableCell>
-                    <TableCell>{item.product.sku ?? "-"}</TableCell>
+                    <TableCell className="font-medium">{item.product.name}</TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">{item.product.sku ?? "-"}</TableCell>
                     <TableCell>{item.quantity}</TableCell>
                     <TableCell className="text-right">
                       {formatCurrency(Number(item.unitCost))}

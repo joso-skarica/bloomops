@@ -22,7 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getDashboardData } from "@/lib/actions/dashboard";
-import { DEMO_DASHBOARD } from "@/lib/demo-data";
+import { DEMO_DASHBOARD, isDemoEnabled } from "@/lib/demo-data";
 import { formatCurrency, formatDate, formatNumber, getOrderStatusVariant, getShipmentStatusVariant } from "@/lib/format";
 import { MonthlyChart } from "@/components/dashboard/monthly-chart";
 
@@ -39,7 +39,7 @@ const kpiIcons = {
 export default async function DashboardPage() {
   const dbData = await getDashboardData();
 
-  const useDemo = dbData.totalActiveProducts === 0;
+  const useDemo = dbData.totalActiveProducts === 0 && isDemoEnabled();
   const data = useDemo ? DEMO_DASHBOARD : dbData;
 
   const kpis = [
@@ -179,12 +179,16 @@ export default async function DashboardPage() {
                   data.recentShipments.map((s) => (
                     <TableRow key={s.id}>
                       <TableCell>
-                        <Link
-                          href={useDemo ? "#" : `/shipments/${s.id}`}
-                          className="font-medium hover:underline underline-offset-4"
-                        >
-                          {s.supplierName}
-                        </Link>
+                        {useDemo ? (
+                          <span className="font-medium">{s.supplierName}</span>
+                        ) : (
+                          <Link
+                            href={`/shipments/${s.id}`}
+                            className="font-medium hover:underline underline-offset-4"
+                          >
+                            {s.supplierName}
+                          </Link>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge variant={getShipmentStatusVariant(s.status)}>{s.status}</Badge>
@@ -228,12 +232,16 @@ export default async function DashboardPage() {
                   data.recentOrders.map((o) => (
                     <TableRow key={o.id}>
                       <TableCell>
-                        <Link
-                          href={useDemo ? "#" : `/orders/${o.id}`}
-                          className="font-medium hover:underline underline-offset-4"
-                        >
-                          {o.orderNumber}
-                        </Link>
+                        {useDemo ? (
+                          <span className="font-medium">{o.orderNumber}</span>
+                        ) : (
+                          <Link
+                            href={`/orders/${o.id}`}
+                            className="font-medium hover:underline underline-offset-4"
+                          >
+                            {o.orderNumber}
+                          </Link>
+                        )}
                       </TableCell>
                       <TableCell>{o.customerName || "-"}</TableCell>
                       <TableCell>

@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getOrders } from "@/lib/actions/orders";
-import { DEMO_ORDERS } from "@/lib/demo-data";
+import { DEMO_ORDERS, isDemoEnabled } from "@/lib/demo-data";
 import { formatCurrency, formatDate, getOrderStatusVariant } from "@/lib/format";
 import { OrderSearch } from "@/components/orders/order-search";
 import { ShoppingCart } from "lucide-react";
@@ -27,7 +27,7 @@ export default async function OrdersPage({
   const dbOrders = await getOrders({ search: sp.search, status: sp.status });
 
   const hasFilters = !!(sp.search || sp.status);
-  const useDemo = dbOrders.length === 0 && !hasFilters;
+  const useDemo = dbOrders.length === 0 && !hasFilters && isDemoEnabled();
   const orders = useDemo ? DEMO_ORDERS : dbOrders;
 
   return (
@@ -76,12 +76,16 @@ export default async function OrdersPage({
               {orders.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell>
-                    <Link
-                      href={useDemo ? "#" : `/orders/${order.id}`}
-                      className="font-medium hover:underline underline-offset-4"
-                    >
-                      {order.orderNumber}
-                    </Link>
+                    {useDemo ? (
+                      <span className="font-medium">{order.orderNumber}</span>
+                    ) : (
+                      <Link
+                        href={`/orders/${order.id}`}
+                        className="font-medium hover:underline underline-offset-4"
+                      >
+                        {order.orderNumber}
+                      </Link>
+                    )}
                   </TableCell>
                   <TableCell>{order.customerName || "-"}</TableCell>
                   <TableCell>

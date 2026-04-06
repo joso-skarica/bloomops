@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/table";
 import { getOrderById } from "@/lib/actions/orders";
 import { OrderStatusActions } from "@/components/orders/order-status-actions";
+import { ChevronLeft, Pencil } from "lucide-react";
 
 export default async function OrderDetailPage({
   params,
@@ -33,24 +34,39 @@ export default async function OrderDetailPage({
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center gap-2">
+        <Link
+          href="/orders"
+          className="flex items-center text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ChevronLeft className="size-4" />
+          Back to orders
+        </Link>
+      </div>
+
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Order {order.orderNumber}</h1>
-          <p className="text-muted-foreground">Order detail and fulfillment flow</p>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold tracking-tight">Order {order.orderNumber}</h1>
+            <Badge variant={getOrderStatusVariant(order.status)}>{order.status}</Badge>
+          </div>
+          <p className="text-muted-foreground">
+            {order.customerName || "No customer name"}
+          </p>
         </div>
         {canEdit ? (
           <Link href={`/orders/${order.id}/edit`}>
-            <Button variant="outline">Edit Order</Button>
+            <Button variant="outline">
+              <Pencil className="size-4" />
+              Edit
+            </Button>
           </Link>
         ) : null}
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            Order Info
-            <Badge variant={getOrderStatusVariant(order.status)}>{order.status}</Badge>
-          </CardTitle>
+          <CardTitle>Order Info</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-3 text-sm md:grid-cols-2">
           <p>

@@ -16,7 +16,7 @@ import { getOrders } from "@/lib/actions/orders";
 import { DEMO_ORDERS, isDemoEnabled } from "@/lib/demo-data";
 import { formatCurrency, formatDate, getOrderStatusVariant } from "@/lib/format";
 import { OrderSearch } from "@/components/orders/order-search";
-import { ShoppingCart } from "lucide-react";
+import { Plus, ShoppingCart } from "lucide-react";
 
 export default async function OrdersPage({
   searchParams,
@@ -38,7 +38,10 @@ export default async function OrdersPage({
           <p className="text-muted-foreground">Manage customer orders and fulfillment</p>
         </div>
         <Link href="/orders/new">
-          <Button>New Order</Button>
+          <Button>
+            <Plus className="size-4" />
+            New Order
+          </Button>
         </Link>
       </div>
 

@@ -26,57 +26,51 @@ import { DEMO_DASHBOARD, isDemoEnabled } from "@/lib/demo-data";
 import { formatCurrency, formatDate, formatNumber, getOrderStatusVariant, getShipmentStatusVariant } from "@/lib/format";
 import { MonthlyChart } from "@/components/dashboard/monthly-chart";
 
-const kpiIcons = {
-  products: Package,
-  suppliers: Truck,
-  lowStock: AlertTriangle,
-  stockUnits: Boxes,
-  stockValue: DollarSign,
-  orders: ShoppingCart,
-  profit: TrendingUp,
-} as const;
-
 export default async function DashboardPage() {
   const dbData = await getDashboardData();
 
   const useDemo = dbData.totalActiveProducts === 0 && isDemoEnabled();
   const data = useDemo ? DEMO_DASHBOARD : dbData;
 
-  const kpis = [
+  const topKpis = [
     {
       label: "Active Products",
       value: formatNumber(data.totalActiveProducts),
-      icon: kpiIcons.products,
+      icon: Package,
     },
     {
       label: "Suppliers",
       value: formatNumber(data.totalSuppliers),
-      icon: kpiIcons.suppliers,
+      icon: Truck,
     },
     {
       label: "Low Stock Items",
       value: formatNumber(data.lowStockCount),
-      icon: kpiIcons.lowStock,
+      icon: AlertTriangle,
+      warn: data.lowStockCount > 0,
     },
     {
       label: "Total Stock Units",
       value: formatNumber(data.totalStockUnits),
-      icon: kpiIcons.stockUnits,
+      icon: Boxes,
     },
+  ];
+
+  const bottomKpis = [
     {
       label: "Est. Stock Value",
       value: formatCurrency(data.estimatedStockValue),
-      icon: kpiIcons.stockValue,
+      icon: DollarSign,
     },
     {
       label: "Orders This Month",
       value: formatNumber(data.ordersThisMonth),
-      icon: kpiIcons.orders,
+      icon: ShoppingCart,
     },
     {
       label: "Gross Profit (Month)",
       value: formatCurrency(data.grossProfitThisMonth),
-      icon: kpiIcons.profit,
+      icon: TrendingUp,
     },
   ];
 
@@ -89,53 +83,18 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* KPI Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((kpi) => {
-          const Icon = kpi.icon;
-          const isLowStock = kpi.label === "Low Stock Items";
-          const hasLowStock = isLowStock && data.lowStockCount > 0;
-
-          return (
-            <Card key={kpi.label}>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {kpi.label}
-                </CardTitle>
-                <div
-                  className={cn(
-                    "flex size-9 items-center justify-center rounded-lg",
-                    hasLowStock
-                      ? "bg-amber-100 dark:bg-amber-950/30"
-                      : "bg-primary/10"
-                  )}
-                >
-                  <Icon
-                    className={cn(
-                      "size-4",
-                      hasLowStock
-                        ? "text-amber-600 dark:text-amber-500"
-                        : "text-primary"
-                    )}
-                  />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p
-                  className={cn(
-                    "text-2xl font-bold",
-                    hasLowStock && "text-amber-600 dark:text-amber-500"
-                  )}
-                >
-                  {kpi.value}
-                </p>
-              </CardContent>
-            </Card>
-          );
-        })}
+        {topKpis.map((kpi) => (
+          <KpiCard key={kpi.label} {...kpi} />
+        ))}
       </div>
 
-      {/* Charts */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {bottomKpis.map((kpi) => (
+          <KpiCard key={kpi.label} {...kpi} />
+        ))}
+      </div>
+
       <div className="grid gap-4 lg:grid-cols-2">
         <MonthlyChart
           title="Monthly Sales"
@@ -148,9 +107,7 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* Recent Tables */}
       <div className="grid gap-4 lg:grid-cols-2">
-        {/* Recent Shipments */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">Recent Shipments</CardTitle>
@@ -171,7 +128,7 @@ export default async function DashboardPage() {
               <TableBody>
                 {data.recentShipments.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
+                    <TableCell colSpan={4} className="py-8 text-center text-muted-foreground">
                       No shipments yet.
                     </TableCell>
                   </TableRow>
@@ -203,7 +160,6 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Recent Orders */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">Recent Orders</CardTitle>
@@ -224,7 +180,7 @@ export default async function DashboardPage() {
               <TableBody>
                 {data.recentOrders.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
+                    <TableCell colSpan={4} className="py-8 text-center text-muted-foreground">
                       No orders yet.
                     </TableCell>
                   </TableRow>
@@ -259,5 +215,36 @@ export default async function DashboardPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+function KpiCard({ label, value, icon: Icon, warn }: {
+  label: string;
+  value: string;
+  icon: React.ComponentType<{ className?: string }>;
+  warn?: boolean;
+}) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground">
+          {label}
+        </CardTitle>
+        <div className={cn(
+          "flex size-9 items-center justify-center rounded-lg",
+          warn ? "bg-amber-100 dark:bg-amber-950/30" : "bg-primary/10"
+        )}>
+          <Icon className={cn(
+            "size-4",
+            warn ? "text-amber-600 dark:text-amber-500" : "text-primary"
+          )} />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <p className={cn("text-2xl font-bold", warn && "text-amber-600 dark:text-amber-500")}>
+          {value}
+        </p>
+      </CardContent>
+    </Card>
   );
 }

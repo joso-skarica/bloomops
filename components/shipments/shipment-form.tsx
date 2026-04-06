@@ -210,7 +210,7 @@ export function ShipmentForm({ suppliers, products }: ShipmentFormProps) {
           ))}
 
           <div className="flex justify-end border-t pt-3 text-sm font-medium">
-            Total: ${subtotal.toFixed(2)}
+            Total: {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(subtotal)}
           </div>
         </CardContent>
       </Card>

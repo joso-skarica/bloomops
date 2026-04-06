@@ -27,7 +27,7 @@ const currencyFmt = new Intl.NumberFormat("en-US", {
   currency: "USD",
 });
 
-export function MonthlyChart({ title, data, color = "hsl(var(--primary))" }: MonthlyChartProps) {
+export function MonthlyChart({ title, data, color = "oklch(0.46 0.09 150)" }: MonthlyChartProps) {
   return (
     <Card>
       <CardHeader>
@@ -35,11 +35,13 @@ export function MonthlyChart({ title, data, color = "hsl(var(--primary))" }: Mon
       </CardHeader>
       <CardContent>
         {data.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No data available.</p>
+          <div className="flex items-center justify-center h-[280px] text-sm text-muted-foreground">
+            No data available yet.
+          </div>
         ) : (
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={data} margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="oklch(0.906 0.008 55)" />
               <XAxis
                 dataKey="month"
                 tick={{ fontSize: 11 }}
@@ -56,6 +58,7 @@ export function MonthlyChart({ title, data, color = "hsl(var(--primary))" }: Mon
               <Tooltip
                 formatter={(value) => [currencyFmt.format(Number(value)), title]}
                 labelStyle={{ fontWeight: 600 }}
+                contentStyle={{ borderRadius: "8px", border: "1px solid oklch(0.906 0.008 55)" }}
               />
               <Bar dataKey="value" fill={color} radius={[4, 4, 0, 0]} />
             </BarChart>

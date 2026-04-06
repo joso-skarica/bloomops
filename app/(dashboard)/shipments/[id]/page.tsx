@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatCurrency, formatDate, getShipmentStatusVariant } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getShipmentById } from "@/lib/actions/shipments";
+import { ChevronLeft } from "lucide-react";
 
 export default async function ShipmentDetailPage({
   params,
@@ -31,19 +33,33 @@ export default async function ShipmentDetailPage({
     0
   );
 
+  const ref = "SHP-" + shipment.id.slice(-6).toUpperCase();
+
   return (
     <div className="space-y-6">
+      <div className="flex items-center gap-2">
+        <Link
+          href="/shipments"
+          className="flex items-center text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ChevronLeft className="size-4" />
+          Back to shipments
+        </Link>
+      </div>
+
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Shipment Detail</h1>
-        <p className="text-muted-foreground">Shipment {shipment.id.slice(0, 8)}...</p>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold tracking-tight">Shipment {ref}</h1>
+          <Badge variant={getShipmentStatusVariant(shipment.status)}>{shipment.status}</Badge>
+        </div>
+        <p className="text-muted-foreground">
+          From {shipment.supplier.name}
+        </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            Shipment Info
-            <Badge variant={getShipmentStatusVariant(shipment.status)}>{shipment.status}</Badge>
-          </CardTitle>
+          <CardTitle>Shipment Info</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-3 text-sm md:grid-cols-2">
           <p>

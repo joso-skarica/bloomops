@@ -13,12 +13,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { PackageCheck } from "lucide-react";
+import { PackageCheck, Plus } from "lucide-react";
 import { getShipments } from "@/lib/actions/shipments";
+
+function formatShipmentRef(id: string) {
+  return "SHP-" + id.slice(-6).toUpperCase();
+}
 
 export default async function ShipmentsPage() {
   const dbShipments = await getShipments();
-
   const useDemo = dbShipments.length === 0 && isDemoEnabled();
 
   return (
@@ -29,7 +32,10 @@ export default async function ShipmentsPage() {
           <p className="text-muted-foreground">Track incoming inventory shipments</p>
         </div>
         <Link href="/shipments/new">
-          <Button>New Shipment</Button>
+          <Button>
+            <Plus className="size-4" />
+            New Shipment
+          </Button>
         </Link>
       </div>
 
@@ -38,7 +44,7 @@ export default async function ShipmentsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Shipment ID</TableHead>
+                <TableHead>Ref</TableHead>
                 <TableHead>Supplier</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Received</TableHead>
@@ -49,7 +55,7 @@ export default async function ShipmentsPage() {
               {DEMO_SHIPMENTS.map((shipment) => (
                 <TableRow key={shipment.id}>
                   <TableCell>
-                    <span className="font-medium">
+                    <span className="font-medium font-mono text-xs">
                       {shipment.id.replace("demo-", "").toUpperCase()}
                     </span>
                   </TableCell>
@@ -81,7 +87,7 @@ export default async function ShipmentsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Shipment ID</TableHead>
+                <TableHead>Ref</TableHead>
                 <TableHead>Supplier</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Received</TableHead>
@@ -98,8 +104,8 @@ export default async function ShipmentsPage() {
                 return (
                   <TableRow key={shipment.id}>
                     <TableCell>
-                      <Link href={`/shipments/${shipment.id}`} className="font-medium hover:underline underline-offset-4">
-                        {shipment.id.slice(0, 8)}...
+                      <Link href={`/shipments/${shipment.id}`} className="font-medium font-mono text-xs hover:underline underline-offset-4">
+                        {formatShipmentRef(shipment.id)}
                       </Link>
                     </TableCell>
                     <TableCell>{shipment.supplier.name}</TableCell>

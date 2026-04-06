@@ -29,8 +29,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <TooltipProvider>{children}</TooltipProvider>
-        <Toaster richColors closeButton position="top-right" />
+        <TooltipProvider>
+          {children}
+          <Toaster richColors position="top-center" />
+        </TooltipProvider>
       </body>
     </html>
   );

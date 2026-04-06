@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+const PICK_PRODUCT = "__pick__";
+
 type ProductOption = {
   id: string;
   name: string;
@@ -44,6 +46,16 @@ interface OrderFormProps {
     status: "draft" | "confirmed";
     items: OrderLineItem[];
   };
+}
+
+function productLineLabel(
+  products: ProductOption[],
+  productId: string
+): string | undefined {
+  if (!productId) return undefined;
+  const p = products.find((x) => x.id === productId);
+  if (!p) return undefined;
+  return p.sku ? `${p.name} (${p.sku})` : p.name;
 }
 
 export function OrderForm({ products, mode, orderId, initialValues }: OrderFormProps) {
@@ -223,13 +235,21 @@ export function OrderForm({ products, mode, orderId, initialValues }: OrderFormP
               <div className="space-y-2">
                 <Label>Product</Label>
                 <Select
-                  value={item.productId}
-                  onValueChange={(value) => onProductChange(index, value)}
+                  value={item.productId || PICK_PRODUCT}
+                  onValueChange={(value) =>
+                    onProductChange(
+                      index,
+                      value === PICK_PRODUCT || value == null ? null : value
+                    )
+                  }
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select product" />
+                    <SelectValue placeholder="Select product">
+                      {productLineLabel(products, item.productId)}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value={PICK_PRODUCT}>Select a product…</SelectItem>
                     {products.map((product) => (
                       <SelectItem key={product.id} value={product.id}>
                         {product.name}

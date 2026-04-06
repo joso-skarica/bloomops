@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +23,8 @@ import {
   PRODUCT_UNITS,
 } from "@/lib/validations/product";
 import Link from "next/link";
+
+const NO_SUPPLIER = "__none__";
 
 interface ProductFormProps {
   product?: {
@@ -53,8 +55,24 @@ export function ProductForm({ product, suppliers }: ProductFormProps) {
     null,
   );
 
+  const [category, setCategory] = useState(product?.category ?? "flowers");
+  const [unit, setUnit] = useState(product?.unit ?? "each");
+  const [supplierId, setSupplierId] = useState(product?.supplierId ?? "");
+
+  useEffect(() => {
+    setCategory(product?.category ?? "flowers");
+    setUnit(product?.unit ?? "each");
+    setSupplierId(product?.supplierId ?? "");
+  }, [product?.id, product?.category, product?.unit, product?.supplierId]);
+
+  const supplierSelectValue = supplierId || NO_SUPPLIER;
+
   return (
     <form action={formAction}>
+      <input type="hidden" name="category" value={category} />
+      <input type="hidden" name="unit" value={unit} />
+      <input type="hidden" name="supplierId" value={supplierId} />
+
       <Card>
         <CardHeader>
           <CardTitle>{isEditing ? "Edit Product" : "New Product"}</CardTitle>
@@ -98,10 +116,10 @@ export function ProductForm({ product, suppliers }: ProductFormProps) {
                 Category <span className="text-destructive">*</span>
               </Label>
               <Select
-                name="category"
-                defaultValue={product?.category ?? "flowers"}
+                value={category}
+                onValueChange={(v) => setCategory(v ?? "flowers")}
               >
-                <SelectTrigger id="category">
+                <SelectTrigger id="category" className="w-full">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -121,8 +139,11 @@ export function ProductForm({ product, suppliers }: ProductFormProps) {
 
             <div className="space-y-2">
               <Label htmlFor="unit">Unit</Label>
-              <Select name="unit" defaultValue={product?.unit ?? "each"}>
-                <SelectTrigger id="unit">
+              <Select
+                value={unit}
+                onValueChange={(v) => setUnit(v ?? "each")}
+              >
+                <SelectTrigger id="unit" className="w-full">
                   <SelectValue placeholder="Select unit" />
                 </SelectTrigger>
                 <SelectContent>
@@ -220,14 +241,16 @@ export function ProductForm({ product, suppliers }: ProductFormProps) {
           <div className="space-y-2">
             <Label htmlFor="supplierId">Supplier</Label>
             <Select
-              name="supplierId"
-              defaultValue={product?.supplierId ?? ""}
+              value={supplierSelectValue}
+              onValueChange={(v) =>
+                setSupplierId(v === NO_SUPPLIER || v == null ? "" : v)
+              }
             >
-              <SelectTrigger id="supplierId">
+              <SelectTrigger id="supplierId" className="w-full">
                 <SelectValue placeholder="None" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">None</SelectItem>
+                <SelectItem value={NO_SUPPLIER}>None</SelectItem>
                 {suppliers.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
                     {s.name}

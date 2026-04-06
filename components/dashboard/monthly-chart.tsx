@@ -56,7 +56,7 @@ export function MonthlyChart({ title, data, color = "oklch(0.46 0.09 150)" }: Mo
                 width={50}
               />
               <Tooltip
-                formatter={(value) => [currencyFmt.format(Number(value)), title]}
+                formatter={(value) => [currencyFmt.format(Number(value ?? 0)), title]}
                 labelStyle={{ fontWeight: 600 }}
                 contentStyle={{ borderRadius: "8px", border: "1px solid oklch(0.906 0.008 55)" }}
               />

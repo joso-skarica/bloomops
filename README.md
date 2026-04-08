@@ -163,3 +163,10 @@ prisma/
 
 - Authentication uses hardcoded demo credentials — suitable for portfolio demonstration, not for public multi-user production use without replacing the auth layer.
 - See [CASE_STUDY.md](CASE_STUDY.md) for a detailed write-up of implementation decisions and architecture.
+
+## Copyright
+
+Copyright © 2026 Joso Skarica. All rights reserved.
+
+This repository is publicly visible for portfolio and evaluation purposes only.
+No license is granted to use, copy, modify, distribute, or commercially exploit the source code in this repository.

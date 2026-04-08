@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,12 +58,6 @@ export function ProductForm({ product, suppliers }: ProductFormProps) {
   const [category, setCategory] = useState(product?.category ?? "flowers");
   const [unit, setUnit] = useState(product?.unit ?? "each");
   const [supplierId, setSupplierId] = useState(product?.supplierId ?? "");
-
-  useEffect(() => {
-    setCategory(product?.category ?? "flowers");
-    setUnit(product?.unit ?? "each");
-    setSupplierId(product?.supplierId ?? "");
-  }, [product?.id, product?.category, product?.unit, product?.supplierId]);
 
   const supplierSelectValue = supplierId || NO_SUPPLIER;
 
@@ -304,3 +298,4 @@ export function ProductForm({ product, suppliers }: ProductFormProps) {
     </form>
   );
 }
+
